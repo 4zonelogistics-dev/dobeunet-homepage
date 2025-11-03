@@ -1,0 +1,44 @@
+# Security Headers for Dobeu Tech Solutions
+# These headers help protect against common web vulnerabilities
+
+/*
+  # Content Security Policy - Restrict sources of content
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.apollo.io https://app.apollo.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://app.apollo.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://app.apollo.io;
+
+  # Prevent clickjacking attacks
+  X-Frame-Options: DENY
+
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Enable XSS filter in browsers
+  X-XSS-Protection: 1; mode=block
+
+  # Referrer policy - control how much referrer information is shared
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Feature Policy / Permissions Policy - restrict browser features
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+
+  # Strict Transport Security - force HTTPS (uncomment when HTTPS is live)
+  # Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Cache Control for HTML (no cache)
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Static assets - aggressive caching
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images - moderate caching
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.jpg
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Cache-Control: public, max-age=604800
+
+/*.webp
+  Cache-Control: public, max-age=604800
