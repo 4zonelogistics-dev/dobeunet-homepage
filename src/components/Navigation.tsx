@@ -39,7 +39,7 @@ export default function Navigation() {
           <div className="flex items-center">
             <a href="/" className="focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 rounded-lg" aria-label="Dobeu Tech Solutions - Home">
               <img
-                src="/2025-10-11- Dobeu Logo (Logo with Text)whtiebck.png"
+                src="/2025-10-11- Dobeu Logo (Logo with Text)whtiebck.svg"
                 alt="Dobeu Tech Solutions"
                 className="h-10 sm:h-12 lg:h-14 w-auto dark:brightness-0 dark:invert transition-all"
               />

@@ -7,7 +7,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://dobeu.net/</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,7 +15,7 @@
   <!-- Privacy Policy -->
   <url>
     <loc>https://dobeu.net/privacy</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -23,7 +23,7 @@
   <!-- Terms of Service -->
   <url>
     <loc>https://dobeu.net/tos</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>

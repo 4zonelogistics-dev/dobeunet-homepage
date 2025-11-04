@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-8 items-start">
           <div>
             <img
-              src="/2025-10-11- Dobeu Logo (Logo with Text)whtiebck.png"
+              src="/2025-10-11- Dobeu Logo (Logo with Text)whtiebck.svg"
               alt="Dobeu Tech Solutions"
               className="h-10 mb-4 brightness-0 invert"
             />
