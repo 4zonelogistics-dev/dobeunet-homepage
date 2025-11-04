@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import NetworkStatus from './NetworkStatus';
+import IntercomChat from './IntercomChat';
 
 export default function Layout() {
   const scrollToTop = () => {
@@ -15,6 +16,7 @@ export default function Layout() {
       </a>
 
       <NetworkStatus />
+      <IntercomChat />
       <Navigation />
 
       <main id="main-content" role="main">

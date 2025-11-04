@@ -3,7 +3,7 @@
 
 /*
   # Content Security Policy - Restrict sources of content
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.apollo.io https://app.apollo.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://app.apollo.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://app.apollo.io;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.apollo.io https://app.apollo.io https://js.intercomcdn.com https://widget.intercom.io https://*.intercom.io; style-src 'self' 'unsafe-inline' https://js.intercomcdn.com; img-src 'self' data: https:; font-src 'self' data: https://js.intercomcdn.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://app.apollo.io https://*.intercom.io https://api-iam.intercom.io wss://*.intercom.io; frame-src https://intercom-sheets.com https://*.intercom.io; child-src https://intercom-sheets.com https://*.intercom.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://app.apollo.io;
 
   # Prevent clickjacking attacks
   X-Frame-Options: DENY
