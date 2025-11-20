@@ -48,7 +48,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
 
     // Build aggregation pipeline
-    const pipeline: any[] = [];
+    const pipeline: Record<string, unknown>[] = [];
 
     // Text search using Atlas Search if query provided
     if (searchParams.query) {
@@ -68,7 +68,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
     }
 
     // Build match stage for filters
-    const matchStage: any = {};
+    const matchStage: Record<string, unknown> = {};
     if (searchParams.error_type) {
       matchStage.error_type = searchParams.error_type;
     }
@@ -96,7 +96,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     // If no search query, use regular find with filters
     if (!searchParams.query) {
-      const filter: any = {};
+      const filter: Record<string, unknown> = {};
       if (searchParams.error_type) filter.error_type = searchParams.error_type;
       if (searchParams.severity) filter.severity = searchParams.severity;
       if (searchParams.date_from || searchParams.date_to) {

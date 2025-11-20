@@ -210,27 +210,15 @@ export const handler: Handler = async (event: HandlerEvent) => {
         leads: {
           total: totalLeads,
           periodTotal: leadsStats[0]?.total || 0,
-          byType: leadsByType.reduce((acc: any, item: any) => {
-            acc[item._id] = item.count;
-            return acc;
-          }, {}),
-          byBusinessType: leadsByBusinessType.reduce((acc: any, item: any) => {
-            acc[item._id] = item.count;
-            return acc;
-          }, {}),
+          byType: reduceFacet(leadsByType),
+          byBusinessType: reduceFacet(leadsByBusinessType),
           dailyTrend: dailyLeads,
         },
         errors: {
           total: totalErrors,
           periodTotal: errorsStats[0]?.total || 0,
-          bySeverity: errorsBySeverity.reduce((acc: any, item: any) => {
-            acc[item._id] = item.count;
-            return acc;
-          }, {}),
-          byType: errorsByType.reduce((acc: any, item: any) => {
-            acc[item._id] = item.count;
-            return acc;
-          }, {}),
+          bySeverity: reduceFacet(errorsBySeverity),
+          byType: reduceFacet(errorsByType),
           dailyTrend: dailyErrors,
         },
       }),
@@ -248,4 +236,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   }
 };
+
+type FacetEntry = {
+  _id: string;
+  count: number;
+};
+
+function reduceFacet(entries: FacetEntry[] = []) {
+  return entries.reduce<Record<string, number>>((acc, item) => {
+    if (!item?._id) {
+      return acc;
+    }
+    acc[item._id] = item.count;
+    return acc;
+  }, {});
+}
 

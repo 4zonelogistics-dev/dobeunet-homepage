@@ -9,7 +9,6 @@ if (!MONGODB_URI) {
 
 // Global variable to cache the MongoDB client across function invocations
 let cachedClient: MongoClient | null = null;
-let connectionAttempts = 0;
 const MAX_CONNECTION_ATTEMPTS = 3;
 
 /**
@@ -47,7 +46,6 @@ export async function connectToDatabase(): Promise<MongoClient> {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= MAX_CONNECTION_ATTEMPTS; attempt++) {
     try {
-      connectionAttempts = attempt;
       await client.connect();
       
       // Verify connection by pinging the database
