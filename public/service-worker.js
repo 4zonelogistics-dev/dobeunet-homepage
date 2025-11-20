@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname.includes('/api/') || url.hostname.includes('supabase')) {
+  if (url.pathname.includes('/api/') || url.pathname.startsWith('/.netlify/functions/')) {
     event.respondWith(networkFirst(request));
     return;
   }

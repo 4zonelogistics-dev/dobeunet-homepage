@@ -115,10 +115,10 @@ export default function PrivacyPolicy() {
         </ul>
       </LegalSection>
 
-      <LegalSection id="data-storage" title="4. Data Storage and Security">
+        <LegalSection id="data-storage" title="4. Data Storage and Security">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mt-4 mb-2">4.1 Primary Data Storage</h3>
         <p>
-          We use <strong>Supabase</strong> as our primary database provider for storing customer data. Supabase provides enterprise-grade security with:
+            We use <strong>MongoDB Atlas</strong> as our primary database provider for storing customer data. MongoDB Atlas provides enterprise-grade security with:
         </p>
         <ul className="list-disc ml-6 space-y-2">
           <li>Data encryption at rest using AES-256 encryption</li>
@@ -157,8 +157,8 @@ export default function PrivacyPolicy() {
 
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mt-4 mb-2">5.1 Service Providers</h3>
         <p>We share data with trusted third-party service providers who assist in:</p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Database Hosting:</strong> Supabase (data storage and infrastructure)</li>
+          <ul className="list-disc ml-6 space-y-2">
+            <li><strong>Database Hosting:</strong> MongoDB Atlas (data storage and infrastructure)</li>
           <li><strong>Payment Processing:</strong> Stripe, Square (payment transactions)</li>
           <li><strong>Email Communications:</strong> [EMAIL SERVICE PROVIDER - TO BE SPECIFIED]</li>
           <li><strong>Analytics:</strong> [ANALYTICS PROVIDER - TO BE SPECIFIED, e.g., Google Analytics, Mixpanel]</li>

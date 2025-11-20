@@ -37,7 +37,7 @@ export function getContextualErrorMessage(
       retryable: false
     }),
 
-    [ErrorType.SUPABASE]: (ctx) => ({
+      [ErrorType.DATABASE]: (ctx) => ({
       title: 'Data Error',
       message: ctx.action
         ? `We couldn't ${ctx.action} right now. Our team has been notified.`
@@ -143,7 +143,7 @@ export function getRecoverySteps(errorType: ErrorType): string[] {
       'Check for any format requirements',
       'Try submitting again'
     ],
-    [ErrorType.SUPABASE]: [
+      [ErrorType.DATABASE]: [
       'Wait a moment and try again',
       'Refresh the page',
       'Check your internet connection',

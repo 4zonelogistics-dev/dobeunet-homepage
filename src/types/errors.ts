@@ -1,7 +1,7 @@
 export enum ErrorType {
   NETWORK = 'NETWORK',
   VALIDATION = 'VALIDATION',
-  SUPABASE = 'SUPABASE',
+  DATABASE = 'DATABASE',
   AUTHENTICATION = 'AUTHENTICATION',
   UNEXPECTED = 'UNEXPECTED',
   TIMEOUT = 'TIMEOUT',
@@ -47,14 +47,14 @@ export class ValidationError extends Error {
   }
 }
 
-export class SupabaseError extends Error {
-  type = ErrorType.SUPABASE;
+export class DatabaseError extends Error {
+  type = ErrorType.DATABASE;
   severity = ErrorSeverity.ERROR;
   retryable = false;
 
   constructor(message: string, public userMessage: string = 'A database error occurred. Please try again.', public code?: string) {
     super(message);
-    this.name = 'SupabaseError';
+    this.name = 'DatabaseError';
   }
 }
 
@@ -83,11 +83,11 @@ export class UnexpectedError extends Error {
 export function createAppError(error: unknown): AppError {
   const timestamp = new Date().toISOString();
 
-  if (error instanceof NetworkError ||
-      error instanceof ValidationError ||
-      error instanceof SupabaseError ||
-      error instanceof TimeoutError ||
-      error instanceof UnexpectedError) {
+    if (error instanceof NetworkError ||
+        error instanceof ValidationError ||
+        error instanceof DatabaseError ||
+        error instanceof TimeoutError ||
+        error instanceof UnexpectedError) {
     return {
       type: error.type,
       severity: error.severity,
