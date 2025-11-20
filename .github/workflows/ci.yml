@@ -277,6 +277,7 @@ jobs:
         run: |
           if [ "${{ needs.dependency-audit.result }}" != "success" ] || \
              [ "${{ needs.code-quality.result }}" != "success" ] || \
+             [ "${{ needs.security-scan.result }}" != "success" ] || \
              [ "${{ needs.build.result }}" != "success" ] || \
              [ "${{ needs.bundle-size.result }}" != "success" ] || \
              [ "${{ needs.security-headers.result }}" != "success" ]; then
