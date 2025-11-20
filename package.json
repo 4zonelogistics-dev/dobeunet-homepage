@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@intercom/messenger-js-sdk": "^0.0.18",
-    "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/typography": "^0.5.19",
     "lucide-react": "^0.344.0",
     "mongodb": "^7.0.0",
