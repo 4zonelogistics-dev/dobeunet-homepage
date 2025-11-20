@@ -33,10 +33,11 @@
 
 #### `search-leads.ts`
 - Full-text search across all lead fields
-- Filter by business type, submission type, date range
+- Filter by business type, submission type, date range, score, priority, state, and radius (geospatial)
 - Pagination support
 - Fuzzy matching (typo tolerance)
 - Relevance scoring
+- Faceted response (business type, submission type, priority, state)
 
 #### `search-errors.ts`
 - Full-text search across error messages, stack traces
@@ -50,10 +51,36 @@
 - ✅ Prefix matching
 - ✅ Relevance scoring
 - ✅ Fast performance with Atlas Search indexes
+- ✅ Geospatial filtering + service area radius queries
+- ✅ Faceted aggregations for richer dashboards
 
 ---
 
-### 3. ✅ Analytics & Reporting (`analytics.ts`)
+### 3. ✅ Lead Scoring, Enrichment, and Real-Time Alerts
+
+#### `submit-lead.ts`
+- Normalizes new location/headcount/marketing fields
+- Auto-scores every lead (0-100) and sets `hot/warm/nurture` priority
+- Generates insights + follow-up recommendations for handoffs
+
+#### `lead-scoring.ts`
+- Recomputes scores for backlog or targeted `_id`s (force or delta mode)
+- Ensures analytics stay in sync after heuristic tweaks
+
+#### `enrich-lead.ts`
+- Adds lightweight enrichment (headcount, tags, follow-ups) based on domain heuristics
+- Supports manual enrichment per lead from Ops dashboard
+
+#### `lead-notifications.ts`
+- Uses MongoDB change streams + stored resume tokens to capture new inserts
+- Optional Slack/webhook notifications via `LEAD_ALERT_WEBHOOK_URL`
+- Adjustable window (`durationMs`) and minimum priority filters
+
+**Business Value:** Faster response to strategy/pilot requests, consistent CRM data, and proactive notification loops for high-value accounts.
+
+---
+
+### 4. ✅ Analytics & Reporting (`analytics.ts`)
 
 **Analytics Provided:**
 - Total leads and errors (all time and period)
@@ -72,7 +99,21 @@
 
 ---
 
-### 4. ✅ Data Verification (`verify-data.ts`)
+### 5. ✅ Time-Series Analytics (`time-series-analytics.ts`)
+
+**Capabilities:**
+- Daily / weekly / monthly rollups for leads and error logs
+- Hot-lead mix + average score per interval
+- Severity distribution for error logs
+
+**Use Cases:**
+- Track seasonal demand across NJ / Philly footprint
+- Measure campaign impact week-over-week
+- Feed lightweight BI dashboards without extra tooling
+
+---
+
+### 6. ✅ Data Verification (`verify-data.ts`)
 
 **Verification Features:**
 - Connection status check
@@ -91,7 +132,7 @@
 
 ---
 
-### 5. ✅ Database Setup Script (`scripts/mongodb-setup.js`)
+### 7. ✅ Database Setup Script (`scripts/mongodb-setup.js`)
 
 **What It Does:**
 - Creates collections with JSON schema validation
@@ -114,7 +155,7 @@
 
 ---
 
-### 6. ✅ Atlas Search Index Configuration
+### 8. ✅ Atlas Search Index Configuration
 
 **Indexes Defined:**
 - `leads_search` - Full-text search on leads collection
@@ -123,6 +164,22 @@
 **Configuration Files:**
 - `mongodb-atlas-search-indexes.json` - Complete index definitions
 - `MONGODB_ATLAS_SEARCH_SETUP.md` - Step-by-step setup guide
+
+---
+
+### 9. ✅ Test Data Seeder (`scripts/create-test-data.js`)
+- Quickly seeds realistic NJ/PA leads + error logs for QA
+- Uses official MongoDB Node.js driver (ESM)
+- Adds geo coordinates, marketing metadata, and analytic-friendly timestamps
+- Usage: `MONGODB_URI="mongodb+srv://..." node scripts/create-test-data.js`
+
+---
+
+### 10. ✅ Legacy Database Clean-up
+- Deleted `supabase/` migrations and Supabase-specific runbooks/scripts
+- Removed Netlify + PowerShell helpers that referenced Supabase env vars
+- Ensured package manifests, env docs, and Netlify functions reference MongoDB exclusively
+- Clarified rollback path via `MONGODB_MIGRATION.md` (historical context only)
 
 ---
 
@@ -283,6 +340,58 @@ GET /.netlify/functions/verify-data
   }
 }
 ```
+
+---
+
+#### 5. Lead Notifications
+```
+POST /.netlify/functions/lead-notifications
+```
+
+**Body Example**
+```json
+{
+  "durationMs": 5000,
+  "minPriority": "warm"
+}
+```
+
+Streams change events for the requested window, persists resume tokens, and (optionally) posts to the webhook configured via `LEAD_ALERT_WEBHOOK_URL`.
+
+---
+
+#### 6. Lead Scoring (Batch)
+```
+POST /.netlify/functions/lead-scoring
+```
+
+**Body Options**
+- `limit` (default 50)
+- `force` (boolean)
+- `leadIds` (array of `_id` strings)
+
+---
+
+#### 7. Lead Enrichment
+```
+POST /.netlify/functions/enrich-lead
+```
+
+Body:
+```json
+{ "leadId": "<Mongo ObjectId>" }
+```
+
+Applies heuristic enrichment (headcount, tags, follow-ups).
+
+---
+
+#### 8. Time-Series Analytics
+```
+GET /.netlify/functions/time-series-analytics?days=90&granularity=weekly
+```
+
+Returns grouped time-series arrays (counts, hot mix, average score, severity mix) for leads and error logs.
 
 ---
 

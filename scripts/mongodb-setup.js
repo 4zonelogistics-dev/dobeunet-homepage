@@ -21,7 +21,7 @@ db.createCollection('leads', {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
-      required: ['name', 'email', 'company', 'business_type', 'phone', 'submission_type', 'created_at'],
+      required: ['name', 'email', 'company', 'business_type', 'phone', 'submission_type', 'created_at', 'location'],
       properties: {
         name: {
           bsonType: 'string',
@@ -61,6 +61,54 @@ db.createCollection('leads', {
           bsonType: 'date',
           description: 'Creation timestamp',
         },
+        priority: {
+          enum: ['hot', 'warm', 'nurture'],
+          description: 'Automatic lead priority',
+        },
+        score: {
+          bsonType: 'int',
+          minimum: 0,
+          maximum: 100,
+          description: 'Lead score (0-100)',
+        },
+        estimated_locations: {
+          bsonType: ['int', 'null'],
+          minimum: 1,
+          description: 'Estimated number of locations',
+        },
+        headcount: {
+          bsonType: ['int', 'null'],
+          minimum: 1,
+          description: 'Team size / headcount',
+        },
+        location: {
+          bsonType: 'object',
+          required: ['city', 'state', 'postal_code'],
+          properties: {
+            city: { bsonType: 'string' },
+            state: { bsonType: 'string', minLength: 2, maxLength: 2 },
+            postal_code: { bsonType: 'string' },
+            coordinates: {
+              bsonType: 'object',
+              properties: {
+                type: { enum: ['Point'] },
+                coordinates: {
+                  bsonType: 'array',
+                  items: [{ bsonType: 'double' }, { bsonType: 'double' }],
+                },
+              },
+            },
+          },
+        },
+        marketing: {
+          bsonType: ['object', 'null'],
+          properties: {
+            utm_source: { bsonType: 'string' },
+            utm_medium: { bsonType: 'string' },
+            utm_campaign: { bsonType: 'string' },
+            lead_source: { bsonType: 'string' },
+          },
+        },
       },
     },
   },
@@ -81,10 +129,23 @@ db.leads.createIndex({ submission_type: 1 }, { name: 'submission_type_1' });
 // Business type index
 db.leads.createIndex({ business_type: 1 }, { name: 'business_type_1' });
 
+// Priority and score indexes
+db.leads.createIndex({ priority: 1, score: -1 }, { name: 'priority_score' });
+db.leads.createIndex({ score: -1, created_at: -1 }, { name: 'score_created_at' });
+
 // Compound index for common queries
 db.leads.createIndex(
-  { submission_type: 1, created_at: -1 },
-  { name: 'submission_type_created_at' }
+  { submission_type: 1, priority: 1, created_at: -1 },
+  { name: 'submission_priority_created_at' }
+);
+
+// Geospatial index
+db.leads.createIndex({ 'location.coordinates': '2dsphere' }, { name: 'location_geo' });
+
+// State + business type index
+db.leads.createIndex(
+  { 'location.state': 1, business_type: 1 },
+  { name: 'state_business_type' }
 );
 
 // Text index for basic text search (fallback if Atlas Search not available)

@@ -5,16 +5,40 @@
  * through Netlify Functions (serverless backend)
  */
 
+export interface LeadLocation {
+  city: string;
+  state: string;
+  postal_code: string;
+  coordinates?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+}
+
+export interface LeadMarketing {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  lead_source?: string;
+}
+
 export interface Lead {
   id?: string;
   name: string;
   email: string;
   company: string;
-  business_type: string;
+  business_type: 'restaurant' | 'fleet' | 'other';
   phone: string;
-  message: string;
+  message?: string;
   submission_type: 'strategy' | 'pilot';
+  location: LeadLocation;
+  estimated_locations?: number;
+  headcount?: number;
+  marketing?: LeadMarketing;
+  score?: number;
+  priority?: 'hot' | 'warm' | 'nurture';
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface ErrorLog {
@@ -33,7 +57,9 @@ export interface ErrorLog {
 /**
  * Submit a lead to MongoDB via Netlify Function
  */
-export async function submitLead(lead: Omit<Lead, 'id' | 'created_at'>): Promise<{ success: boolean; error?: string }> {
+export async function submitLead(
+  lead: Omit<Lead, 'id' | 'created_at' | 'updated_at' | 'score' | 'priority'>
+): Promise<{ success: boolean; error?: string; score?: number; priority?: Lead['priority'] }> {
   try {
     const response = await fetch('/.netlify/functions/submit-lead', {
       method: 'POST',
@@ -50,7 +76,11 @@ export async function submitLead(lead: Omit<Lead, 'id' | 'created_at'>): Promise
       return { success: false, error: data.error || 'Failed to submit lead' };
     }
 
-    return { success: true };
+    return {
+      success: true,
+      score: data.score,
+      priority: data.priority,
+    };
   } catch (error) {
     console.error('Unexpected error submitting lead:', error);
     return { success: false, error: 'An unexpected error occurred' };

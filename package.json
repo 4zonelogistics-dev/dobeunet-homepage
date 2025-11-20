@@ -11,7 +11,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "seed:test-data": "node scripts/create-test-data.js"
   },
   "dependencies": {
     "@intercom/messenger-js-sdk": "^0.0.18",
