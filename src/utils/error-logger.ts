@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { logError as logErrorToMongo } from '../lib/mongodb-client';
 import { AppError, ErrorSeverity } from '../types/errors';
 
 interface ErrorLog extends AppError {
@@ -47,28 +47,26 @@ async function flushErrorLogs(): Promise<void> {
   }
 
   try {
-    const { error } = await supabase
-      .from('error_logs')
-      .insert(logsToFlush.map(log => ({
-        error_type: log.type,
-        severity: log.severity,
-        message: log.message,
-        user_message: log.userMessage,
-        code: log.code,
-        details: log.details,
-        user_agent: log.user_agent,
-        url: log.url,
-        stack: log.stack,
-        timestamp: log.timestamp,
-      })));
-
-    if (error) {
-      console.error('[Error Logger] Failed to flush error logs:', error);
-      ERROR_LOG_QUEUE.unshift(...logsToFlush);
-    }
+    // Log each error to MongoDB
+    await Promise.all(
+      logsToFlush.map(log =>
+        logErrorToMongo({
+          error_type: log.type as any,
+          severity: log.severity,
+          message: log.message,
+          user_message: log.userMessage,
+          code: log.code,
+          details: log.details,
+          user_agent: log.user_agent,
+          url: log.url,
+          stack: log.stack,
+          timestamp: typeof log.timestamp === 'string' ? new Date(log.timestamp) : log.timestamp,
+        })
+      )
+    );
   } catch (err) {
     console.error('[Error Logger] Exception while flushing logs:', err);
-    ERROR_LOG_QUEUE.unshift(...logsToFlush);
+    // Don't re-queue on failure with MongoDB - the logError function already handles failures
   }
 }
 

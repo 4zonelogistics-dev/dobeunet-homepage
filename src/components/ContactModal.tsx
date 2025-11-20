@@ -1,7 +1,6 @@
 import React, { FormEvent, useEffect, useRef } from 'react';
 import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { supabaseQuery } from '../lib/supabase-enhanced';
-import { supabase } from '../lib/supabase';
+import { submitLead, mongoQuery } from '../lib/mongodb-client';
 import { useFormValidation } from '../hooks/use-form-validation';
 import { useToast } from './ToastContainer';
 import { createAppError } from '../types/errors';
@@ -44,9 +43,9 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
     try {
       const normalizedValues = getNormalizedValues();
 
-      const { error } = await supabaseQuery(
+      const { data, error } = await mongoQuery(
         async () => {
-          const result = await supabase.from('leads').insert([{
+          return await submitLead({
             name: normalizedValues.name,
             email: normalizedValues.email,
             company: normalizedValues.company,
@@ -54,14 +53,13 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
             phone: normalizedValues.phone,
             message: normalizedValues.message,
             submission_type: type,
-          }]);
-          return result;
+          });
         }
       );
 
-      if (error) {
-        showError(error);
-        const appError = createAppError(new Error(error));
+      if (error || !data?.success) {
+        showError(error || data?.error || 'Failed to submit form');
+        const appError = createAppError(new Error(error || data?.error || 'Failed to submit form'));
         logError(appError, { form: 'contact_modal', type });
         return;
       }

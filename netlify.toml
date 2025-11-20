@@ -8,8 +8,8 @@
   # Directory to publish (Vite outputs to 'dist')
   publish = "dist"
   
-  # Functions directory (if you add serverless functions later)
-  # functions = "netlify/functions"
+  # Functions directory for MongoDB serverless API
+  functions = "netlify/functions"
 
 [build.environment]
   # Node version
@@ -79,8 +79,8 @@
 # - CNAME: www -> <site-name>.netlify.app
 
 # Environment variables (set these in Netlify dashboard or via CLI):
-# VITE_SUPABASE_URL=https://qmwefqnbeipmbydhfcfj.supabase.co
-# VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+# MONGODB_URI=mongodb+srv://jeremyw_db_user:feZWyP9XWtYeanXC@dbe-dobeunet.0tw3wi9.mongodb.net/?appName=dbe-dobeunetpublish
+# Note: The MONGODB_URI is used by serverless functions, not exposed to the frontend
 
 # Production context
 [context.production]
