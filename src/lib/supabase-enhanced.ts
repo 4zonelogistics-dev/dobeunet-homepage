@@ -81,7 +81,7 @@ export async function supabaseMutation<T>(
   return supabaseQuery(mutationFn, timeoutMs);
 }
 
-let requestQueue: Array<() => Promise<unknown>> = [];
+const requestQueue: Array<() => Promise<unknown>> = [];
 let isProcessingQueue = false;
 
 export async function queuedSupabaseQuery<T>(

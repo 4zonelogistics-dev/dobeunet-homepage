@@ -31,7 +31,7 @@ export interface FormValidationConfig {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[\d\s\-\(\)\+]+$/;
+const PHONE_REGEX = /^[\d\s()+-]+$/;
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();

@@ -1,4 +1,4 @@
-import { useState, useCallback, createContext, useContext, ReactNode } from 'react';
+import { useState, useCallback, createContext, ReactNode } from 'react';
 import Toast, { ToastProps } from './Toast';
 import { ErrorSeverity } from '../types/errors';
 
@@ -11,15 +11,7 @@ interface ToastContextValue {
   showCritical: (message: string, duration?: number) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | undefined>(undefined);
-
-export function useToast(): ToastContextValue {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within ToastProvider');
-  }
-  return context;
-}
+export const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
 interface ToastProviderProps {
   children: ReactNode;

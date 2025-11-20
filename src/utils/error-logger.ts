@@ -51,7 +51,7 @@ async function flushErrorLogs(): Promise<void> {
     await Promise.all(
       logsToFlush.map(log =>
         logErrorToMongo({
-          error_type: log.type as any,
+          error_type: log.type as 'NETWORK' | 'VALIDATION' | 'DATABASE' | 'AUTHENTICATION' | 'UNEXPECTED' | 'TIMEOUT',
           severity: log.severity,
           message: log.message,
           user_message: log.userMessage,

@@ -94,7 +94,7 @@ class OfflineQueue {
         await this.executeRequest(request);
         this.queue.shift();
         this.saveQueue();
-      } catch (error) {
+      } catch {
         request.retryCount++;
 
         if (request.retryCount >= request.maxRetries) {

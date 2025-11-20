@@ -42,7 +42,7 @@ export async function getDatabase() {
 /**
  * Helper to get a collection
  */
-export async function getCollection<T = any>(collectionName: string) {
+export async function getCollection<T = Document>(collectionName: string) {
   const db = await getDatabase();
   return db.collection<T>(collectionName);
 }

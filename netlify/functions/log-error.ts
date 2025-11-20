@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { Handler, HandlerEvent } from '@netlify/functions';
 import { getCollection } from './mongodb';
 
 interface ErrorLog {
@@ -7,7 +7,7 @@ interface ErrorLog {
   message: string;
   user_message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   user_agent?: string;
   url?: string;
   stack?: string;
@@ -16,8 +16,7 @@ interface ErrorLog {
 }
 
 export const handler: Handler = async (
-  event: HandlerEvent,
-  context: HandlerContext
+  event: HandlerEvent
 ) => {
   // CORS headers
   const headers = {

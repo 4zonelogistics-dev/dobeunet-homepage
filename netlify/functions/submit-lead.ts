@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { Handler, HandlerEvent } from '@netlify/functions';
 import { getCollection } from './mongodb';
 
 interface Lead {
@@ -13,8 +13,7 @@ interface Lead {
 }
 
 export const handler: Handler = async (
-  event: HandlerEvent,
-  context: HandlerContext
+  event: HandlerEvent
 ) => {
   // CORS headers
   const headers = {

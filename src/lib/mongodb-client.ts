@@ -23,7 +23,7 @@ export interface ErrorLog {
   message: string;
   user_message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   user_agent?: string;
   url?: string;
   stack?: string;

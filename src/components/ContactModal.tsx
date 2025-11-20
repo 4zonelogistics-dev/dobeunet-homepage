@@ -2,7 +2,7 @@ import React, { FormEvent, useEffect, useRef } from 'react';
 import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { submitLead, mongoQuery } from '../lib/mongodb-client';
 import { useFormValidation } from '../hooks/use-form-validation';
-import { useToast } from './ToastContainer';
+import { useToast } from '../hooks/use-toast';
 import { createAppError } from '../types/errors';
 import { logError } from '../utils/error-logger';
 
