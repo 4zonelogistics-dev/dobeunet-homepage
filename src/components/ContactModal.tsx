@@ -1,6 +1,7 @@
 import React, { FormEvent, useEffect, useRef } from 'react';
 import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { submitLead, mongoQuery } from '../lib/mongodb-client';
+import type { Lead } from '../lib/mongodb-client';
 import { useFormValidation } from '../hooks/use-form-validation';
 import { useToast } from '../hooks/use-toast';
 import { createAppError } from '../types/errors';
@@ -24,11 +25,31 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
     company: { required: true, minLength: 2, maxLength: 100 },
     businessType: { required: true },
     phone: { required: true, phone: true },
+    locationCity: { required: true, minLength: 2, maxLength: 100 },
+    locationState: { required: true, pattern: /^[A-Za-z]{2}$/i },
+    locationPostalCode: { required: true, pattern: /^\d{5}(-\d{4})?$/ },
+    estimatedLocations: { required: true, pattern: /^\d+$/ },
+    headcount: { pattern: /^\d+$/ },
     message: { maxLength: 1000 },
   });
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [utmParams, setUtmParams] = React.useState({
+    source: '',
+    medium: '',
+    campaign: '',
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setUtmParams({
+      source: params.get('utm_source') || '',
+      medium: params.get('utm_medium') || '',
+      campaign: params.get('utm_campaign') || '',
+    });
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -42,6 +63,7 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
 
     try {
       const normalizedValues = getNormalizedValues();
+      const businessType = (normalizedValues.businessType || 'other') as Lead['business_type'];
 
       const { data, error } = await mongoQuery(
         async () => {
@@ -49,10 +71,23 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
             name: normalizedValues.name,
             email: normalizedValues.email,
             company: normalizedValues.company,
-            business_type: normalizedValues.businessType,
+            business_type: businessType,
             phone: normalizedValues.phone,
             message: normalizedValues.message,
             submission_type: type,
+            location: {
+              city: normalizedValues.locationCity,
+              state: normalizedValues.locationState.toUpperCase(),
+              postal_code: normalizedValues.locationPostalCode,
+            },
+            estimated_locations: Number(normalizedValues.estimatedLocations),
+            headcount: normalizedValues.headcount ? Number(normalizedValues.headcount) : undefined,
+            marketing: {
+              utm_source: utmParams.source,
+              utm_medium: utmParams.medium,
+              utm_campaign: utmParams.campaign,
+              lead_source: 'contact_modal',
+            },
           });
         }
       );
@@ -65,7 +100,8 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
       }
 
       setSubmitted(true);
-      showSuccess('Form submitted successfully! We\'ll be in touch within 24 hours.');
+      const priorityMessage = data?.priority ? ` Priority: ${data.priority.toUpperCase()}.` : '';
+      showSuccess(`Form submitted successfully! We'll be in touch within 24 hours.${priorityMessage}`);
 
       setTimeout(() => {
         onClose();
@@ -273,6 +309,118 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
                     <p id="businessType-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
                       <AlertCircle className="w-4 h-4" aria-hidden="true" />
                       {formState.businessType.error}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label htmlFor="locationCity" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                    Primary City *
+                  </label>
+                  <input
+                    type="text"
+                    id="locationCity"
+                    {...getFieldProps('locationCity')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
+                      formState.locationCity.error && formState.locationCity.touched
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    placeholder="Toms River"
+                  />
+                  {formState.locationCity.error && formState.locationCity.touched && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                      {formState.locationCity.error}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="locationState" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                    State *
+                  </label>
+                  <input
+                    type="text"
+                    id="locationState"
+                    {...getFieldProps('locationState')}
+                    className={`w-full px-4 py-3 border rounded-lg uppercase tracking-widest focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
+                      formState.locationState.error && formState.locationState.touched
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    maxLength={2}
+                    placeholder="NJ"
+                  />
+                  {formState.locationState.error && formState.locationState.touched && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                      {formState.locationState.error}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="locationPostalCode" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                    ZIP Code *
+                  </label>
+                  <input
+                    type="text"
+                    id="locationPostalCode"
+                    {...getFieldProps('locationPostalCode')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
+                      formState.locationPostalCode.error && formState.locationPostalCode.touched
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    placeholder="08753"
+                  />
+                  {formState.locationPostalCode.error && formState.locationPostalCode.touched && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                      {formState.locationPostalCode.error}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="estimatedLocations" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                    Active Locations *
+                  </label>
+                  <input
+                    type="number"
+                    id="estimatedLocations"
+                    min={1}
+                    {...getFieldProps('estimatedLocations')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
+                      formState.estimatedLocations.error && formState.estimatedLocations.touched
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    placeholder="10"
+                  />
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Helps us tailor pricing for your footprint.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="headcount" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                    Total Team Size (optional)
+                  </label>
+                  <input
+                    type="number"
+                    id="headcount"
+                    min={1}
+                    {...getFieldProps('headcount')}
+                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                    placeholder="250"
+                  />
+                  {formState.headcount.error && formState.headcount.touched && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                      {formState.headcount.error}
                     </p>
                   )}
                 </div>

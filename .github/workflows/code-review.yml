@@ -1,0 +1,240 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Static Code Analysis
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint with report
+        run: npm run lint -- --format=json --output-file=eslint-report.json
+        continue-on-error: true
+
+      - name: Analyze complexity
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+            
+            // Get changed files
+            const changedFiles = execSync('git diff --name-only origin/${{ github.base_ref }}...HEAD')
+              .toString()
+              .split('\n')
+              .filter(f => f.match(/\.(ts|tsx|js|jsx)$/));
+            
+            if (changedFiles.length > 0) {
+              let report = '## 📊 Code Analysis Report\n\n';
+              report += `**Files Changed:** ${changedFiles.length}\n\n`;
+              report += '### Changed Files:\n';
+              changedFiles.forEach(file => {
+                if (file) report += `- ${file}\n`;
+              });
+              
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }
+
+  # Security focused review
+  security-review:
+    name: Security Code Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          echo "Checking for potential secrets..."
+          if grep -r -E "(password|secret|api[_-]?key|token|mongodb://|postgres://).*=[\"']" src/ --exclude-dir=node_modules; then
+            echo "⚠️ Potential hardcoded secrets found!"
+            echo "Review the matches above"
+            exit 1
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
+
+      - name: Check for dangerous patterns
+        run: |
+          echo "Checking for dangerous code patterns..."
+          dangerous_patterns=(
+            "eval\("
+            "dangerouslySetInnerHTML"
+            "innerHTML\s*="
+            "document\.write"
+            "__html"
+          )
+          
+          found=0
+          for pattern in "${dangerous_patterns[@]}"; do
+            if grep -r -E "$pattern" src/ --exclude-dir=node_modules; then
+              echo "⚠️ Dangerous pattern found: $pattern"
+              found=1
+            fi
+          done
+          
+          if [ $found -eq 0 ]; then
+            echo "✅ No dangerous patterns detected"
+          else
+            echo "⚠️ Review dangerous patterns above"
+            exit 1
+          fi
+
+      - name: Check environment variables
+        run: |
+          echo "Checking for proper environment variable usage..."
+          if grep -r "import\.meta\.env\." src/ --exclude-dir=node_modules | grep -v "PROD"; then
+            echo "⚠️ Warning: Frontend environment variables detected"
+            echo "Ensure no secrets are exposed to frontend"
+          else
+            echo "✅ No frontend environment variables with secrets"
+          fi
+
+  # Code quality metrics
+  code-quality-metrics:
+    name: Code Quality Metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Calculate code metrics
+        run: |
+          echo "## 📈 Code Quality Metrics" > metrics.md
+          echo "" >> metrics.md
+          
+          # Count TypeScript files
+          ts_files=$(find src -name "*.ts" -o -name "*.tsx" | wc -l)
+          echo "**TypeScript Files:** $ts_files" >> metrics.md
+          
+          # Count lines of code
+          loc=$(find src -name "*.ts" -o -name "*.tsx" | xargs wc -l | tail -1 | awk '{print $1}')
+          echo "**Lines of Code:** $loc" >> metrics.md
+          
+          # Count components
+          components=$(find src/components -name "*.tsx" | wc -l)
+          echo "**React Components:** $components" >> metrics.md
+          
+          # Count hooks
+          hooks=$(find src/hooks -name "*.ts" | wc -l)
+          echo "**Custom Hooks:** $hooks" >> metrics.md
+          
+          # Count functions
+          functions=$(find netlify/functions -name "*.ts" | wc -l)
+          echo "**Netlify Functions:** $functions" >> metrics.md
+          
+          cat metrics.md
+
+      - name: Comment metrics on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const metrics = fs.readFileSync('metrics.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: metrics
+            });
+
+  # Best practices check
+  best-practices:
+    name: Best Practices Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for console.log in production
+        run: |
+          echo "Checking for console.log statements..."
+          if grep -r "console\.log\|console\.debug\|console\.info" src/ --exclude-dir=node_modules --exclude="*.test.*"; then
+            echo "⚠️ Warning: console.log found (should be removed for production)"
+            echo "These will be stripped by build, but consider removing them"
+          else
+            echo "✅ No console.log statements found"
+          fi
+        continue-on-error: true
+
+      - name: Check file sizes
+        run: |
+          echo "Checking for large files..."
+          find src -type f -size +100k -exec ls -lh {} \; | awk '{print $9 " - " $5}'
+        continue-on-error: true
+
+      - name: Check for TODOs and FIXMEs
+        run: |
+          echo "Checking for TODO/FIXME comments..."
+          todos=$(grep -r -n "TODO\|FIXME" src/ --exclude-dir=node_modules || true)
+          if [ -n "$todos" ]; then
+            echo "📝 TODOs found:"
+            echo "$todos"
+          else
+            echo "✅ No TODOs found"
+          fi
+        continue-on-error: true
+
+      - name: Post best practices summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ✅ Best Practices Check Complete
+              
+              All automated checks have been run. Review the logs for details.
+              
+              ### Recommended Manual Review
+              - [ ] Code follows project conventions
+              - [ ] No sensitive data in commits
+              - [ ] Documentation updated if needed
+              - [ ] Breaking changes documented
+              - [ ] MongoDB functionality preserved`
+            });
+

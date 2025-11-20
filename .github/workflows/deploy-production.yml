@@ -1,0 +1,213 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  # Pre-deployment checks
+  pre-deployment-checks:
+    name: Pre-Deployment Security & Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level=high
+        continue-on-error: false
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run typecheck
+
+      - name: Build verification
+        run: npm run build
+
+      - name: Verify MongoDB configuration
+        run: |
+          if [ -f "netlify/functions/mongodb.ts" ]; then
+            echo "✅ MongoDB configuration exists"
+          else
+            echo "❌ MongoDB configuration missing"
+            exit 1
+          fi
+
+      - name: Verify Netlify Functions
+        run: |
+          if [ -f "netlify/functions/submit-lead.ts" ] && \
+             [ -f "netlify/functions/log-error.ts" ] && \
+             [ -f "netlify/functions/mongodb.ts" ]; then
+            echo "✅ All Netlify Functions present"
+          else
+            echo "❌ Some Netlify Functions missing"
+            exit 1
+          fi
+
+  # Notify deployment start
+  deployment-start:
+    name: Notify Deployment Start
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks]
+    steps:
+      - name: Create deployment
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: production
+          initial-status: in_progress
+
+      - name: Comment on commit
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '🚀 Deploying to production... Pre-deployment checks passed ✅'
+            });
+
+  # Deploy to Netlify
+  deploy-netlify:
+    name: Deploy to Netlify Production
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks, deployment-start]
+    environment:
+      name: production
+      url: https://dobeu.net
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './dist'
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions - ${{ github.event.head_commit.message }}"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+          functions-dir: './netlify/functions'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 10
+
+      - name: Deployment success notification
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '✅ Successfully deployed to production!\n\n🌐 Live at: https://dobeu.net\n📊 Netlify: https://dobeu-net.netlify.app'
+            });
+
+  # Post-deployment verification
+  post-deployment-tests:
+    name: Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: [deploy-netlify]
+    steps:
+      - name: Wait for deployment to propagate
+        run: sleep 30
+
+      - name: Check Netlify URL
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://dobeu-net.netlify.app)
+          if [ "$response" = "200" ]; then
+            echo "✅ Netlify URL is accessible"
+          else
+            echo "❌ Netlify URL returned status: $response"
+            exit 1
+          fi
+
+      - name: Check custom domain
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://dobeu.net)
+          if [ "$response" = "200" ]; then
+            echo "✅ Custom domain is accessible"
+          else
+            echo "⚠️ Custom domain returned status: $response (may need DNS propagation)"
+          fi
+        continue-on-error: true
+
+      - name: Check MongoDB Function
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X OPTIONS https://dobeu-net.netlify.app/.netlify/functions/submit-lead)
+          if [ "$response" = "200" ]; then
+            echo "✅ MongoDB function is accessible"
+          else
+            echo "⚠️ MongoDB function returned status: $response"
+          fi
+        continue-on-error: true
+
+  # Deployment complete notification
+  deployment-complete:
+    name: Deployment Complete
+    runs-on: ubuntu-latest
+    needs: [post-deployment-tests]
+    if: always()
+    steps:
+      - name: Update deployment status
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          state: ${{ needs.post-deployment-tests.result == 'success' && 'success' || 'failure' }}
+          deployment-id: ${{ needs.deployment-start.outputs.deployment-id }}
+          environment-url: https://dobeu.net
+
+      - name: Final notification
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = '${{ needs.post-deployment-tests.result }}';
+            const emoji = status === 'success' ? '✅' : '⚠️';
+            const message = status === 'success' 
+              ? 'Deployment and verification complete!'
+              : 'Deployment complete but verification had warnings. Check logs.';
+            
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `${emoji} ${message}\n\n**Production:** https://dobeu.net\n**Netlify:** https://dobeu-net.netlify.app`
+            });
+

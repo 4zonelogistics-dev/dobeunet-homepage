@@ -1,0 +1,72 @@
+# Dependabot configuration for automated dependency updates
+
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    target-branch: "dev"
+    reviewers:
+      - "Dobeu-Tech-Solutions"
+    assignees:
+      - "Dobeu-Tech-Solutions"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    
+    # Version update strategy
+    versioning-strategy: increase-if-necessary
+    
+    # Ignore specific packages if needed
+    ignore:
+      # Ignore major version updates for vite (requires manual testing)
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      
+      # Ignore major version updates for React (requires manual testing)
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+    # Group related updates
+    groups:
+      react:
+        patterns:
+          - "react*"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "*eslint*"
+      typescript:
+        patterns:
+          - "typescript*"
+          - "@types/*"
+      vite:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    target-branch: "dev"
+    labels:
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+
