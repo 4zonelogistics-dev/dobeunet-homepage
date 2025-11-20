@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2';
+const CACHE_VERSION = '3';
 const CACHE_NAME = `dobeu-static-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `dobeu-runtime-v${CACHE_VERSION}`;
 const IMAGE_CACHE = `dobeu-images-v${CACHE_VERSION}`;
@@ -62,8 +62,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // For scripts and styles, always try network first to avoid serving broken cached versions
   if (request.destination === 'script' || request.destination === 'style') {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 

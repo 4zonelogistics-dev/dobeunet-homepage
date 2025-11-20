@@ -229,15 +229,34 @@
 
     <!-- Global error handler to prevent script errors from crashing the app -->
     <script>
+      // Enhanced error logging for production debugging
       window.addEventListener('error', function(event) {
-        console.error('[Global Error Handler]', event.error || event.message);
-        event.preventDefault();
+        console.error('[Global Error Handler]', {
+          message: event.message,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+          error: event.error
+        });
+        // Don't prevent default to allow React error boundary to catch it
       });
 
       window.addEventListener('unhandledrejection', function(event) {
         console.error('[Global Unhandled Rejection]', event.reason);
-        event.preventDefault();
+        // Don't prevent default to allow React error boundary to catch it
       });
+
+      // Clear old service workers on page load (helps with cache issues)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            // Optionally clear all service workers - uncomment if needed for debugging
+            // registrations.forEach(function(registration) {
+            //   registration.unregister();
+            // });
+          });
+        });
+      }
     </script>
   </head>
   <body>
