@@ -1,0 +1,97 @@
+{
+  "leads_search": {
+    "collection": "leads",
+    "database": "dobeunet",
+    "mappings": {
+      "dynamic": true,
+      "fields": {
+        "name": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "email": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "company": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "business_type": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "phone": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "message": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "submission_type": {
+          "type": "string",
+          "analyzer": "lucene.keyword",
+          "searchAnalyzer": "lucene.keyword"
+        },
+        "created_at": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "error_logs_search": {
+    "collection": "error_logs",
+    "database": "dobeunet",
+    "mappings": {
+      "dynamic": true,
+      "fields": {
+        "message": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "user_message": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "stack": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "code": {
+          "type": "string",
+          "analyzer": "lucene.keyword",
+          "searchAnalyzer": "lucene.keyword"
+        },
+        "error_type": {
+          "type": "string",
+          "analyzer": "lucene.keyword",
+          "searchAnalyzer": "lucene.keyword"
+        },
+        "severity": {
+          "type": "string",
+          "analyzer": "lucene.keyword",
+          "searchAnalyzer": "lucene.keyword"
+        },
+        "url": {
+          "type": "string",
+          "analyzer": "lucene.standard",
+          "searchAnalyzer": "lucene.standard"
+        },
+        "timestamp": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
+
