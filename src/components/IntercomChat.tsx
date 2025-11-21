@@ -14,11 +14,13 @@ export default function IntercomChat() {
     const loadIntercom = async () => {
       try {
         // Wait for page to be fully loaded before loading Intercom
-        if (document.readyState !== "complete") {
-          await new Promise((resolve) => {
-            window.addEventListener("load", resolve, { once: true });
-          });
-        }
+        await new Promise(resolve => {
+          if (document.readyState === 'complete') {
+            resolve(undefined);
+          } else {
+            window.addEventListener('load', () => resolve(undefined), { once: true });
+          }
+        });
 
         // Additional delay to ensure page is fully interactive
         await new Promise((resolve) => setTimeout(resolve, 2000));
