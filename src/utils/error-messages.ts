@@ -173,6 +173,15 @@ export function getRecoverySteps(errorType: ErrorType): string[] {
 }
 
 /**
+ * Escape HTML special characters to prevent XSS
+ */
+function escapeHTML(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/**
  * Generate HTML for fatal error UI when React cannot mount
  * Used for pre-React initialization errors
  */
@@ -187,14 +196,17 @@ export function getFatalErrorHTML(options: {
     showRecoverySteps = false
   } = options;
 
+  const safeTitle = escapeHTML(title);
+  const safeMessage = escapeHTML(message);
+
   if (!showRecoverySteps) {
-    return `<div style="padding: 2rem; text-align: center; font-family: system-ui;"><h1>${title}</h1><p>${message} Please refresh the page.</p></div>`;
+    return `<div style="padding: 2rem; text-align: center; font-family: system-ui;"><h1>${safeTitle}</h1><p>${safeMessage} Please refresh the page.</p></div>`;
   }
 
   return `
     <div style="padding: 2rem; text-align: center; font-family: system-ui; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #dc2626; margin-bottom: 1rem;">${title}</h1>
-      <p style="margin-bottom: 1rem;">${message} Please try:</p>
+      <h1 style="color: #dc2626; margin-bottom: 1rem;">${safeTitle}</h1>
+      <p style="margin-bottom: 1rem;">${safeMessage} Please try:</p>
       <ul style="text-align: left; display: inline-block; margin-bottom: 1rem;">
         <li>Refreshing the page</li>
         <li>Clearing your browser cache</li>
