@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import { registerServiceWorker } from './utils/register-service-worker';
 import { startConnectionMonitoring } from './utils/connection-monitor';
+import { getFatalErrorHTML } from './utils/error-messages';
 
 // Add error logging before React mounts
 window.addEventListener('error', (event) => {
@@ -21,7 +22,11 @@ window.addEventListener('unhandledrejection', (event) => {
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   console.error('[Fatal] Root element not found!');
-  document.body.innerHTML = '<div style="padding: 2rem; text-align: center; font-family: system-ui;"><h1>Application Error</h1><p>Unable to initialize application. Please refresh the page.</p></div>';
+  document.body.innerHTML = getFatalErrorHTML({
+    title: 'Application Error',
+    message: 'Unable to initialize application.',
+    showRecoverySteps: false
+  });
 } else {
   try {
     // Register service worker (non-blocking)
@@ -51,19 +56,10 @@ if (!rootElement) {
     );
   } catch (error) {
     console.error('[Fatal React Mount Error]', error);
-    rootElement.innerHTML = `
-      <div style="padding: 2rem; text-align: center; font-family: system-ui; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #dc2626; margin-bottom: 1rem;">Application Error</h1>
-        <p style="margin-bottom: 1rem;">Unable to initialize application. Please try:</p>
-        <ul style="text-align: left; display: inline-block; margin-bottom: 1rem;">
-          <li>Refreshing the page</li>
-          <li>Clearing your browser cache</li>
-          <li>Disabling browser extensions</li>
-        </ul>
-        <button onclick="window.location.reload()" style="padding: 0.5rem 1rem; background: #06b6d4; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
-          Refresh Page
-        </button>
-      </div>
-    `;
+    rootElement.innerHTML = getFatalErrorHTML({
+      title: 'Application Error',
+      message: 'Unable to initialize application.',
+      showRecoverySteps: true
+    });
   }
 }
