@@ -173,19 +173,21 @@ export function getRecoverySteps(errorType: ErrorType): string[] {
 }
 
 /**
+ * Map for HTML character escaping to prevent XSS
+ */
+const HTML_ESCAPE_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+
+/**
  * Escape HTML special characters to prevent XSS
  */
 function escapeHTML(str: string): string {
-  return str.replace(/[&<>"']/g, char => {
-    const escapeMap: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    };
-    return escapeMap[char] || char;
-  });
+  return str.replace(/[&<>"']/g, char => HTML_ESCAPE_MAP[char] || char);
 }
 
 /**
