@@ -1,33 +1,55 @@
 import { useEffect } from 'react';
-import Intercom from '@intercom/messenger-js-sdk';
+
+declare global {
+  interface Window {
+    __INTERCOM_BOOTED__?: boolean;
+  }
+}
 
 /**
  * Intercom Chat Component
  *
  * Integrates Intercom Messenger for customer support and engagement.
- * Initializes once when the component mounts and is available across all pages.
+ * Initializes lazily so it never blocks initial render or hydration.
  */
 export default function IntercomChat() {
   useEffect(() => {
-    try {
-      // Initialize Intercom with app ID
-      Intercom({
-        app_id: 'xu0gfiqb',
-      });
+    let cancelled = false;
 
-      console.info('[Intercom] Messenger initialized successfully');
-    } catch (error) {
-      // Gracefully handle Intercom initialization errors
-      // Don't break the app if Intercom fails to load
-      console.error('[Intercom] Failed to initialize:', error);
+    const bootIntercom = async () => {
+      if (cancelled || typeof window === 'undefined' || typeof document === 'undefined') {
+        return;
+      }
+
+      if (window.__INTERCOM_BOOTED__) {
+        return;
+      }
+
+      try {
+        const { default: Intercom } = await import('@intercom/messenger-js-sdk');
+        Intercom({
+          app_id: 'xu0gfiqb',
+        });
+        window.__INTERCOM_BOOTED__ = true;
+        if (import.meta.env.DEV) {
+          console.info('[Intercom] Messenger initialized successfully');
+        }
+      } catch (error) {
+        console.error('[Intercom] Failed to initialize:', error);
+      }
+    };
+
+    if (typeof document !== 'undefined' && document.readyState === 'complete') {
+      bootIntercom();
+    } else {
+      window.addEventListener('load', bootIntercom, { once: true });
     }
 
-    // Cleanup function (optional, but good practice)
     return () => {
-      // Intercom cleanup is handled automatically by the SDK
-      // This is here for future enhancements if needed
+      cancelled = true;
+      window.removeEventListener('load', bootIntercom);
     };
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
   // This component doesn't render anything visible
   // Intercom messenger appears as a widget on the page

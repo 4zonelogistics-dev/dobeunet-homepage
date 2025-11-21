@@ -337,6 +337,12 @@ npm run preview
 - Solution: Verify environment variables are set correctly
 - Solution: Check MongoDB Atlas network access rules and database user credentials
 
+**Supabase error causes blank screen on Netlify**
+- Symptom: Page briefly renders and then disappears with `Missing Supabase environment variables` in the console.
+- Fix: In Netlify → Site settings → Build & deploy → Environment, either supply `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` or omit them intentionally if Supabase is unused.
+- Fix: Go to Deploys → “Trigger deploy” → **Clear cache and deploy site** to flush the stale bundle that still contained the Supabase chunk.
+- Note: The runtime now includes a guard (`ensureOptionalSupabaseConfig`) so missing credentials no longer crash the app, but a cache-clearing redeploy is still required the first time this happens. Remind end users to hard-refresh (Shift + Reload) so their service worker pulls the updated assets.
+
 ## Support
 
 For deployment issues or questions:

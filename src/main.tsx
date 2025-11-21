@@ -7,7 +7,9 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import { registerServiceWorker } from './utils/register-service-worker';
 import { startConnectionMonitoring } from './utils/connection-monitor';
+import { ensureOptionalSupabaseConfig } from './utils/env-check';
 
+ensureOptionalSupabaseConfig();
 registerServiceWorker();
 startConnectionMonitoring();
 

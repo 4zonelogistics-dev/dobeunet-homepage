@@ -132,24 +132,33 @@
     }
   }
 
-  /*
-    Smooth Transitions
-    Applies to theme changes for visual polish
-    Uses reduced motion for accessibility
-  */
-  * {
-    transition-property: background-color, border-color, color, fill, stroke;
-    transition-duration: var(--transition-duration);
-    transition-timing-function: var(--transition-timing);
-  }
-
-  /* Respect user's motion preferences */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
+    /*
+      Smooth Transitions
+      Limit transitions to high-interaction elements to avoid layout thrash
+    */
+    body,
+    button,
+    a,
+    input,
+    textarea,
+    select {
+      transition-property: background-color, border-color, color, fill, stroke;
+      transition-duration: var(--transition-duration);
+      transition-timing-function: var(--transition-timing);
     }
-  }
+
+    /* Respect user's motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      body,
+      button,
+      a,
+      input,
+      textarea,
+      select {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+      }
+    }
 
   /* Base body styling with theme variables */
   body {
