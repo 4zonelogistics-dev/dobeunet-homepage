@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
-import { getCurrentTheme, setTheme, watchSystemTheme } from '../lib/theme-init';
+import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { getCurrentTheme, setTheme, watchSystemTheme } from "../lib/theme-init";
 
 /**
  * Accessible Theme Toggle Component
@@ -20,17 +20,23 @@ interface ThemeToggleProps {
   showLabel?: boolean;
 }
 
-export default function ThemeToggle({ className = '', showLabel = false }: ThemeToggleProps) {
+export default function ThemeToggle({
+  className = "",
+  showLabel = false,
+}: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     setMounted(true);
 
     const preference = getCurrentTheme();
-    const resolved = preference === 'system'
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : preference;
+    const resolved =
+      preference === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : preference;
 
     setCurrentTheme(resolved);
 
@@ -42,7 +48,7 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
   }, []);
 
   const handleToggle = () => {
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     setCurrentTheme(newTheme);
 
@@ -50,7 +56,7 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleToggle();
     }
@@ -65,8 +71,8 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
     );
   }
 
-  const isDark = currentTheme === 'dark';
-  const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+  const isDark = currentTheme === "dark";
+  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
   return (
     <button
@@ -97,11 +103,14 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
             absolute inset-0 w-5 h-5
             text-amber-500
             transition-opacity duration-200 ease-in-out
-            ${isDark ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+            ${isDark ? "opacity-0 pointer-events-none" : "opacity-100"}
           `}
           style={{
-            transform: isDark ? 'rotate(90deg) scale(0.8)' : 'rotate(0deg) scale(1)',
-            transition: 'opacity 200ms ease-in-out, transform 200ms ease-in-out'
+            transform: isDark
+              ? "rotate(90deg) scale(0.8)"
+              : "rotate(0deg) scale(1)",
+            transition:
+              "opacity 200ms ease-in-out, transform 200ms ease-in-out",
           }}
           aria-hidden="true"
         />
@@ -111,11 +120,14 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
             absolute inset-0 w-5 h-5
             text-slate-700 dark:text-slate-200
             transition-opacity duration-200 ease-in-out
-            ${isDark ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+            ${isDark ? "opacity-100" : "opacity-0 pointer-events-none"}
           `}
           style={{
-            transform: isDark ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.8)',
-            transition: 'opacity 200ms ease-in-out, transform 200ms ease-in-out'
+            transform: isDark
+              ? "rotate(0deg) scale(1)"
+              : "rotate(-90deg) scale(0.8)",
+            transition:
+              "opacity 200ms ease-in-out, transform 200ms ease-in-out",
           }}
           aria-hidden="true"
         />
@@ -123,7 +135,7 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
 
       {showLabel && (
         <span className="ml-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-          {isDark ? 'Dark' : 'Light'}
+          {isDark ? "Dark" : "Light"}
         </span>
       )}
 
@@ -144,22 +156,22 @@ export default function ThemeToggle({ className = '', showLabel = false }: Theme
  * Announces theme changes to screen readers
  * Uses aria-live region for non-intrusive announcements
  */
-function announceThemeChange(theme: 'light' | 'dark') {
+function announceThemeChange(theme: "light" | "dark") {
   const message = `Theme changed to ${theme} mode`;
 
-  let announcer = document.getElementById('theme-announcer');
+  let announcer = document.getElementById("theme-announcer");
 
   if (!announcer) {
-    announcer = document.createElement('div');
-    announcer.id = 'theme-announcer';
-    announcer.setAttribute('role', 'status');
-    announcer.setAttribute('aria-live', 'polite');
-    announcer.setAttribute('aria-atomic', 'true');
-    announcer.className = 'sr-only';
+    announcer = document.createElement("div");
+    announcer.id = "theme-announcer";
+    announcer.setAttribute("role", "status");
+    announcer.setAttribute("aria-live", "polite");
+    announcer.setAttribute("aria-atomic", "true");
+    announcer.className = "sr-only";
     document.body.appendChild(announcer);
   }
 
-  announcer.textContent = '';
+  announcer.textContent = "";
 
   setTimeout(() => {
     if (announcer) {
@@ -171,16 +183,19 @@ function announceThemeChange(theme: 'light' | 'dark') {
 /**
  * Compact theme toggle for mobile navigation
  */
-export function CompactThemeToggle({ className = '' }: { className?: string }) {
+export function CompactThemeToggle({ className = "" }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     setMounted(true);
     const preference = getCurrentTheme();
-    const resolved = preference === 'system'
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : preference;
+    const resolved =
+      preference === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : preference;
     setCurrentTheme(resolved);
 
     return watchSystemTheme((newTheme) => {
@@ -189,7 +204,7 @@ export function CompactThemeToggle({ className = '' }: { className?: string }) {
   }, []);
 
   const handleToggle = () => {
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     setCurrentTheme(newTheme);
     announceThemeChange(newTheme);
@@ -197,11 +212,13 @@ export function CompactThemeToggle({ className = '' }: { className?: string }) {
 
   if (!mounted) {
     return (
-      <div className={`w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse ${className}`} />
+      <div
+        className={`w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse ${className}`}
+      />
     );
   }
 
-  const isDark = currentTheme === 'dark';
+  const isDark = currentTheme === "dark";
 
   return (
     <button
@@ -216,7 +233,7 @@ export function CompactThemeToggle({ className = '' }: { className?: string }) {
         focus:outline-none focus:ring-2 focus:ring-cyan-500
         ${className}
       `}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       aria-pressed={isDark}
     >
       {isDark ? (

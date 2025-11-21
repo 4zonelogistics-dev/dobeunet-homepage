@@ -1,5 +1,5 @@
-import { WifiOff, CheckCircle } from 'lucide-react';
-import { useNetworkStatus } from '../hooks/use-network-status';
+import { WifiOff, CheckCircle } from "lucide-react";
+import { useNetworkStatus } from "../hooks/use-network-status";
 
 export default function NetworkStatus() {
   const { isOnline, wasOffline } = useNetworkStatus();

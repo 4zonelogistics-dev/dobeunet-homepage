@@ -1,7 +1,7 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { createAppError } from '../types/errors';
-import { logError } from '../utils/error-logger';
+import { Component, ErrorInfo, ReactNode } from "react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { createAppError } from "../types/errors";
+import { logError } from "../utils/error-logger";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -15,7 +15,10 @@ interface ErrorBoundaryState {
   errorInfo: ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -53,7 +56,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleGoHome = (): void => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   render(): ReactNode {
@@ -64,17 +67,25 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8" role="alert" aria-live="assertive">
+          <div
+            className="max-w-2xl w-full bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8"
+            role="alert"
+            aria-live="assertive"
+          >
             <div className="flex items-start gap-4 mb-6">
               <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" aria-hidden="true" />
+                <AlertTriangle
+                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  aria-hidden="true"
+                />
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                   Something went wrong
                 </h1>
                 <p className="text-slate-600 dark:text-slate-300 text-lg">
-                  We apologize for the inconvenience. An unexpected error has occurred.
+                  We apologize for the inconvenience. An unexpected error has
+                  occurred.
                 </p>
               </div>
             </div>
@@ -128,7 +139,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  fallback?: ReactNode
+  fallback?: ReactNode,
 ): React.ComponentType<P> {
   return (props: P) => (
     <ErrorBoundary fallback={fallback}>

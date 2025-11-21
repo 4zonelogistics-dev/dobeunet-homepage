@@ -1,25 +1,35 @@
-import React, { FormEvent, useEffect, useRef } from 'react';
-import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { submitLead, mongoQuery } from '../lib/mongodb-client';
-import type { Lead } from '../lib/mongodb-client';
-import { useFormValidation } from '../hooks/use-form-validation';
-import { useToast } from '../hooks/use-toast';
-import { createAppError } from '../types/errors';
-import { logError } from '../utils/error-logger';
+import React, { FormEvent, useEffect, useRef } from "react";
+import { X, Send, AlertCircle, CheckCircle2 } from "lucide-react";
+import { submitLead, mongoQuery } from "../lib/mongodb-client";
+import type { Lead } from "../lib/mongodb-client";
+import { useFormValidation } from "../hooks/use-form-validation";
+import { useToast } from "../hooks/use-toast";
+import { createAppError } from "../types/errors";
+import { logError } from "../utils/error-logger";
 
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'strategy' | 'pilot';
+  type: "strategy" | "pilot";
 }
 
-export default function ContactModal({ isOpen, onClose, type }: ContactModalProps) {
+export default function ContactModal({
+  isOpen,
+  onClose,
+  type,
+}: ContactModalProps) {
   const { showSuccess, showError } = useToast();
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
-  const { formState, getFieldProps, validateForm, resetForm, getNormalizedValues } = useFormValidation({
+  const {
+    formState,
+    getFieldProps,
+    validateForm,
+    resetForm,
+    getNormalizedValues,
+  } = useFormValidation({
     name: { required: true, minLength: 2, maxLength: 100 },
     email: { required: true, email: true },
     company: { required: true, minLength: 2, maxLength: 100 },
@@ -36,18 +46,18 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [utmParams, setUtmParams] = React.useState({
-    source: '',
-    medium: '',
-    campaign: '',
+    source: "",
+    medium: "",
+    campaign: "",
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     setUtmParams({
-      source: params.get('utm_source') || '',
-      medium: params.get('utm_medium') || '',
-      campaign: params.get('utm_campaign') || '',
+      source: params.get("utm_source") || "",
+      medium: params.get("utm_medium") || "",
+      campaign: params.get("utm_campaign") || "",
     });
   }, []);
 
@@ -55,7 +65,7 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
     e.preventDefault();
 
     if (!validateForm()) {
-      showError('Please fix the errors in the form before submitting.');
+      showError("Please fix the errors in the form before submitting.");
       return;
     }
 
@@ -63,45 +73,52 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
 
     try {
       const normalizedValues = getNormalizedValues();
-      const businessType = (normalizedValues.businessType || 'other') as Lead['business_type'];
+      const businessType = (normalizedValues.businessType ||
+        "other") as Lead["business_type"];
 
-      const { data, error } = await mongoQuery(
-        async () => {
-          return await submitLead({
-            name: normalizedValues.name,
-            email: normalizedValues.email,
-            company: normalizedValues.company,
-            business_type: businessType,
-            phone: normalizedValues.phone,
-            message: normalizedValues.message,
-            submission_type: type,
-            location: {
-              city: normalizedValues.locationCity,
-              state: normalizedValues.locationState.toUpperCase(),
-              postal_code: normalizedValues.locationPostalCode,
-            },
-            estimated_locations: Number(normalizedValues.estimatedLocations),
-            headcount: normalizedValues.headcount ? Number(normalizedValues.headcount) : undefined,
-            marketing: {
-              utm_source: utmParams.source,
-              utm_medium: utmParams.medium,
-              utm_campaign: utmParams.campaign,
-              lead_source: 'contact_modal',
-            },
-          });
-        }
-      );
+      const { data, error } = await mongoQuery(async () => {
+        return await submitLead({
+          name: normalizedValues.name,
+          email: normalizedValues.email,
+          company: normalizedValues.company,
+          business_type: businessType,
+          phone: normalizedValues.phone,
+          message: normalizedValues.message,
+          submission_type: type,
+          location: {
+            city: normalizedValues.locationCity,
+            state: normalizedValues.locationState.toUpperCase(),
+            postal_code: normalizedValues.locationPostalCode,
+          },
+          estimated_locations: Number(normalizedValues.estimatedLocations),
+          headcount: normalizedValues.headcount
+            ? Number(normalizedValues.headcount)
+            : undefined,
+          marketing: {
+            utm_source: utmParams.source,
+            utm_medium: utmParams.medium,
+            utm_campaign: utmParams.campaign,
+            lead_source: "contact_modal",
+          },
+        });
+      });
 
       if (error || !data?.success) {
-        showError(error || data?.error || 'Failed to submit form');
-        const appError = createAppError(new Error(error || data?.error || 'Failed to submit form'));
-        logError(appError, { form: 'contact_modal', type });
+        showError(error || data?.error || "Failed to submit form");
+        const appError = createAppError(
+          new Error(error || data?.error || "Failed to submit form"),
+        );
+        logError(appError, { form: "contact_modal", type });
         return;
       }
 
       setSubmitted(true);
-      const priorityMessage = data?.priority ? ` Priority: ${data.priority.toUpperCase()}.` : '';
-      showSuccess(`Form submitted successfully! We'll be in touch within 24 hours.${priorityMessage}`);
+      const priorityMessage = data?.priority
+        ? ` Priority: ${data.priority.toUpperCase()}.`
+        : "";
+      showSuccess(
+        `Form submitted successfully! We'll be in touch within 24 hours.${priorityMessage}`,
+      );
 
       setTimeout(() => {
         onClose();
@@ -111,7 +128,7 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
     } catch (err) {
       const appError = createAppError(err);
       showError(appError.userMessage);
-      logError(appError, { form: 'contact_modal', type });
+      logError(appError, { form: "contact_modal", type });
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +146,7 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
     if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
@@ -140,12 +157,12 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -163,12 +180,14 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
         <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-cyan-600 p-6 flex items-center justify-between z-10">
           <div>
             <h3 id="modal-title" className="text-2xl font-bold text-white">
-              {type === 'strategy' ? 'Book Strategy Session' : 'Join Pilot Program'}
+              {type === "strategy"
+                ? "Book Strategy Session"
+                : "Join Pilot Program"}
             </h3>
             <p className="text-cyan-50 text-sm mt-1">
-              {type === 'strategy'
-                ? 'Get your custom operational profit analysis'
-                : 'Apply for early access with pilot pricing'}
+              {type === "strategy"
+                ? "Get your custom operational profit analysis"
+                : "Apply for early access with pilot pricing"}
             </p>
           </div>
           <button
@@ -185,9 +204,14 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
           {submitted ? (
             <div className="text-center py-12" role="status" aria-live="polite">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" aria-hidden="true" />
+                <CheckCircle2
+                  className="w-8 h-8 text-green-600 dark:text-green-400"
+                  aria-hidden="true"
+                />
               </div>
-              <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Thank You!</h4>
+              <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                Thank You!
+              </h4>
               <p className="text-slate-600 dark:text-slate-300">
                 We'll be in touch within 24 hours to schedule your session.
               </p>
@@ -196,89 +220,138 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Full Name *
                   </label>
                   <input
                     ref={firstInputRef}
                     type="text"
                     id="name"
-                    {...getFieldProps('name')}
+                    {...getFieldProps("name")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
                       formState.name.error && formState.name.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="John Smith"
-                    aria-invalid={formState.name.error && formState.name.touched ? 'true' : 'false'}
-                    aria-describedby={formState.name.error && formState.name.touched ? 'name-error' : undefined}
+                    aria-invalid={
+                      formState.name.error && formState.name.touched
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      formState.name.error && formState.name.touched
+                        ? "name-error"
+                        : undefined
+                    }
                   />
                   {formState.name.error && formState.name.touched && (
-                    <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                    <p
+                      id="name-error"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                      role="alert"
+                    >
                       <AlertCircle className="w-4 h-4" aria-hidden="true" />
                       {formState.name.error}
                     </p>
                   )}
-                  {!formState.name.error && formState.name.dirty && formState.name.value.trim().length >= 2 && (
-                    <p className="mt-1 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                      Looks good
-                    </p>
-                  )}
+                  {!formState.name.error &&
+                    formState.name.dirty &&
+                    formState.name.value.trim().length >= 2 && (
+                      <p className="mt-1 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                        Looks good
+                      </p>
+                    )}
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Email Address *
                   </label>
                   <input
                     type="email"
                     id="email"
-                    {...getFieldProps('email')}
+                    {...getFieldProps("email")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
                       formState.email.error && formState.email.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="john@company.com"
-                    aria-invalid={formState.email.error && formState.email.touched ? 'true' : 'false'}
-                    aria-describedby={formState.email.error && formState.email.touched ? 'email-error' : undefined}
+                    aria-invalid={
+                      formState.email.error && formState.email.touched
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      formState.email.error && formState.email.touched
+                        ? "email-error"
+                        : undefined
+                    }
                   />
                   {formState.email.error && formState.email.touched && (
-                    <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                    <p
+                      id="email-error"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                      role="alert"
+                    >
                       <AlertCircle className="w-4 h-4" aria-hidden="true" />
                       {formState.email.error}
                     </p>
                   )}
-                  {!formState.email.error && formState.email.dirty && formState.email.value.includes('@') && (
-                    <p className="mt-1 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                      Valid email
-                    </p>
-                  )}
+                  {!formState.email.error &&
+                    formState.email.dirty &&
+                    formState.email.value.includes("@") && (
+                      <p className="mt-1 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                        Valid email
+                      </p>
+                    )}
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="company" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="company"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Company Name *
                   </label>
                   <input
                     type="text"
                     id="company"
-                    {...getFieldProps('company')}
+                    {...getFieldProps("company")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
                       formState.company.error && formState.company.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="Your Company"
-                    aria-invalid={formState.company.error && formState.company.touched ? 'true' : 'false'}
-                    aria-describedby={formState.company.error && formState.company.touched ? 'company-error' : undefined}
+                    aria-invalid={
+                      formState.company.error && formState.company.touched
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      formState.company.error && formState.company.touched
+                        ? "company-error"
+                        : undefined
+                    }
                   />
                   {formState.company.error && formState.company.touched && (
-                    <p id="company-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                    <p
+                      id="company-error"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                      role="alert"
+                    >
                       <AlertCircle className="w-4 h-4" aria-hidden="true" />
                       {formState.company.error}
                     </p>
@@ -286,118 +359,169 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
                 </div>
 
                 <div>
-                  <label htmlFor="businessType" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="businessType"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Business Type *
                   </label>
                   <select
                     id="businessType"
-                    {...getFieldProps('businessType')}
+                    {...getFieldProps("businessType")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
-                      formState.businessType.error && formState.businessType.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                      formState.businessType.error &&
+                      formState.businessType.touched
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
-                    aria-invalid={formState.businessType.error && formState.businessType.touched ? 'true' : 'false'}
-                    aria-describedby={formState.businessType.error && formState.businessType.touched ? 'businessType-error' : undefined}
+                    aria-invalid={
+                      formState.businessType.error &&
+                      formState.businessType.touched
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      formState.businessType.error &&
+                      formState.businessType.touched
+                        ? "businessType-error"
+                        : undefined
+                    }
                   >
                     <option value="">Select type</option>
-                    <option value="restaurant">Restaurant (5-50 locations)</option>
-                    <option value="fleet">Fleet Operator (25-75 vehicles)</option>
+                    <option value="restaurant">
+                      Restaurant (5-50 locations)
+                    </option>
+                    <option value="fleet">
+                      Fleet Operator (25-75 vehicles)
+                    </option>
                     <option value="other">Other</option>
                   </select>
-                  {formState.businessType.error && formState.businessType.touched && (
-                    <p id="businessType-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
-                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                      {formState.businessType.error}
-                    </p>
-                  )}
+                  {formState.businessType.error &&
+                    formState.businessType.touched && (
+                      <p
+                        id="businessType-error"
+                        className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                        role="alert"
+                      >
+                        <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                        {formState.businessType.error}
+                      </p>
+                    )}
                 </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <label htmlFor="locationCity" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="locationCity"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Primary City *
                   </label>
                   <input
                     type="text"
                     id="locationCity"
-                    {...getFieldProps('locationCity')}
+                    {...getFieldProps("locationCity")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
-                      formState.locationCity.error && formState.locationCity.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                      formState.locationCity.error &&
+                      formState.locationCity.touched
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="Toms River"
                   />
-                  {formState.locationCity.error && formState.locationCity.touched && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
-                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                      {formState.locationCity.error}
-                    </p>
-                  )}
+                  {formState.locationCity.error &&
+                    formState.locationCity.touched && (
+                      <p
+                        className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                        role="alert"
+                      >
+                        <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                        {formState.locationCity.error}
+                      </p>
+                    )}
                 </div>
                 <div>
-                  <label htmlFor="locationState" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="locationState"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     State *
                   </label>
                   <input
                     type="text"
                     id="locationState"
-                    {...getFieldProps('locationState')}
+                    {...getFieldProps("locationState")}
                     className={`w-full px-4 py-3 border rounded-lg uppercase tracking-widest focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
-                      formState.locationState.error && formState.locationState.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                      formState.locationState.error &&
+                      formState.locationState.touched
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     maxLength={2}
                     placeholder="NJ"
                   />
-                  {formState.locationState.error && formState.locationState.touched && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
-                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                      {formState.locationState.error}
-                    </p>
-                  )}
+                  {formState.locationState.error &&
+                    formState.locationState.touched && (
+                      <p
+                        className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                        role="alert"
+                      >
+                        <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                        {formState.locationState.error}
+                      </p>
+                    )}
                 </div>
                 <div>
-                  <label htmlFor="locationPostalCode" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="locationPostalCode"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     ZIP Code *
                   </label>
                   <input
                     type="text"
                     id="locationPostalCode"
-                    {...getFieldProps('locationPostalCode')}
+                    {...getFieldProps("locationPostalCode")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
-                      formState.locationPostalCode.error && formState.locationPostalCode.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                      formState.locationPostalCode.error &&
+                      formState.locationPostalCode.touched
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="08753"
                   />
-                  {formState.locationPostalCode.error && formState.locationPostalCode.touched && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
-                      <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                      {formState.locationPostalCode.error}
-                    </p>
-                  )}
+                  {formState.locationPostalCode.error &&
+                    formState.locationPostalCode.touched && (
+                      <p
+                        className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                        role="alert"
+                      >
+                        <AlertCircle className="w-4 h-4" aria-hidden="true" />
+                        {formState.locationPostalCode.error}
+                      </p>
+                    )}
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="estimatedLocations" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="estimatedLocations"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Active Locations *
                   </label>
                   <input
                     type="number"
                     id="estimatedLocations"
                     min={1}
-                    {...getFieldProps('estimatedLocations')}
+                    {...getFieldProps("estimatedLocations")}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
-                      formState.estimatedLocations.error && formState.estimatedLocations.touched
-                        ? 'border-red-500 dark:border-red-400'
-                        : 'border-slate-300 dark:border-slate-600'
+                      formState.estimatedLocations.error &&
+                      formState.estimatedLocations.touched
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-slate-300 dark:border-slate-600"
                     }`}
                     placeholder="10"
                   />
@@ -406,19 +530,25 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="headcount" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  <label
+                    htmlFor="headcount"
+                    className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                  >
                     Total Team Size (optional)
                   </label>
                   <input
                     type="number"
                     id="headcount"
                     min={1}
-                    {...getFieldProps('headcount')}
+                    {...getFieldProps("headcount")}
                     className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                     placeholder="250"
                   />
                   {formState.headcount.error && formState.headcount.touched && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                    <p
+                      className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                      role="alert"
+                    >
                       <AlertCircle className="w-4 h-4" aria-hidden="true" />
                       {formState.headcount.error}
                     </p>
@@ -427,24 +557,39 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                >
                   Phone Number *
                 </label>
                 <input
                   type="tel"
                   id="phone"
-                  {...getFieldProps('phone')}
+                  {...getFieldProps("phone")}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${
                     formState.phone.error && formState.phone.touched
-                      ? 'border-red-500 dark:border-red-400'
-                      : 'border-slate-300 dark:border-slate-600'
+                      ? "border-red-500 dark:border-red-400"
+                      : "border-slate-300 dark:border-slate-600"
                   }`}
                   placeholder="(555) 123-4567"
-                  aria-invalid={formState.phone.error && formState.phone.touched ? 'true' : 'false'}
-                  aria-describedby={formState.phone.error && formState.phone.touched ? 'phone-error' : undefined}
+                  aria-invalid={
+                    formState.phone.error && formState.phone.touched
+                      ? "true"
+                      : "false"
+                  }
+                  aria-describedby={
+                    formState.phone.error && formState.phone.touched
+                      ? "phone-error"
+                      : undefined
+                  }
                 />
                 {formState.phone.error && formState.phone.touched && (
-                  <p id="phone-error" className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1" role="alert">
+                  <p
+                    id="phone-error"
+                    className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+                    role="alert"
+                  >
                     <AlertCircle className="w-4 h-4" aria-hidden="true" />
                     {formState.phone.error}
                   </p>
@@ -452,13 +597,16 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-semibold text-slate-900 dark:text-white mb-2"
+                >
                   Tell us about your biggest operational challenge
                 </label>
                 <textarea
                   id="message"
                   rows={4}
-                  {...getFieldProps('message')}
+                  {...getFieldProps("message")}
                   className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   placeholder="What's costing you the most money or time right now?"
                 />
@@ -477,7 +625,10 @@ export default function ContactModal({ isOpen, onClose, type }: ContactModalProp
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" aria-hidden="true"></div>
+                    <div
+                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                      aria-hidden="true"
+                    ></div>
                     <span>Submitting...</span>
                   </>
                 ) : (

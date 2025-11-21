@@ -1,5 +1,5 @@
-import { logError as logErrorToMongo } from '../lib/mongodb-client';
-import { AppError, ErrorSeverity } from '../types/errors';
+import { logError as logErrorToMongo } from "../lib/mongodb-client";
+import { AppError, ErrorSeverity } from "../types/errors";
 
 interface ErrorLog extends AppError {
   user_agent?: string;
@@ -13,7 +13,10 @@ const FLUSH_INTERVAL = 10000;
 
 let flushTimer: NodeJS.Timeout | null = null;
 
-export async function logError(error: AppError, additionalContext?: Record<string, unknown>): Promise<void> {
+export async function logError(
+  error: AppError,
+  additionalContext?: Record<string, unknown>,
+): Promise<void> {
   const errorLog: ErrorLog = {
     ...error,
     user_agent: navigator.userAgent,
@@ -22,7 +25,7 @@ export async function logError(error: AppError, additionalContext?: Record<strin
   };
 
   if (shouldLogToConsole(error.severity)) {
-    console.error('[Error Logger]', errorLog);
+    console.error("[Error Logger]", errorLog);
   }
 
   ERROR_LOG_QUEUE.push(errorLog);
@@ -49,9 +52,15 @@ async function flushErrorLogs(): Promise<void> {
   try {
     // Log each error to MongoDB
     await Promise.all(
-      logsToFlush.map(log =>
+      logsToFlush.map((log) =>
         logErrorToMongo({
-          error_type: log.type as 'NETWORK' | 'VALIDATION' | 'DATABASE' | 'AUTHENTICATION' | 'UNEXPECTED' | 'TIMEOUT',
+          error_type: log.type as
+            | "NETWORK"
+            | "VALIDATION"
+            | "DATABASE"
+            | "AUTHENTICATION"
+            | "UNEXPECTED"
+            | "TIMEOUT",
           severity: log.severity,
           message: log.message,
           user_message: log.userMessage,
@@ -60,22 +69,27 @@ async function flushErrorLogs(): Promise<void> {
           user_agent: log.user_agent,
           url: log.url,
           stack: log.stack,
-          timestamp: typeof log.timestamp === 'string' ? new Date(log.timestamp) : log.timestamp,
-        })
-      )
+          timestamp:
+            typeof log.timestamp === "string"
+              ? new Date(log.timestamp)
+              : log.timestamp,
+        }),
+      ),
     );
   } catch (err) {
-    console.error('[Error Logger] Exception while flushing logs:', err);
+    console.error("[Error Logger] Exception while flushing logs:", err);
     // Don't re-queue on failure with MongoDB - the logError function already handles failures
   }
 }
 
 function shouldLogToConsole(severity: ErrorSeverity): boolean {
-  return severity === ErrorSeverity.ERROR || severity === ErrorSeverity.CRITICAL;
+  return (
+    severity === ErrorSeverity.ERROR || severity === ErrorSeverity.CRITICAL
+  );
 }
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', () => {
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", () => {
     if (ERROR_LOG_QUEUE.length > 0) {
       flushErrorLogs();
     }

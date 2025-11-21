@@ -12,8 +12,8 @@
  * - Works without JavaScript (falls back to system preference via CSS)
  */
 
-export const THEME_STORAGE_KEY = 'dobeu-theme-preference';
-export type Theme = 'light' | 'dark' | 'system';
+export const THEME_STORAGE_KEY = "dobeu-theme-preference";
+export type Theme = "light" | "dark" | "system";
 
 /**
  * Gets the inline script that initializes theme before page renders
@@ -99,28 +99,30 @@ export function getThemeInitScript(): string {
  * Used by React components after hydration
  */
 export function getCurrentTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === "undefined") return "system";
 
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-    return stored || 'system';
+    return stored || "system";
   } catch (e) {
-    console.warn('Could not read theme preference:', e);
-    return 'system';
+    console.warn("Could not read theme preference:", e);
+    return "system";
   }
 }
 
 /**
  * Gets the resolved theme (light or dark) based on current preference
  */
-export function getResolvedTheme(): 'light' | 'dark' {
+export function getResolvedTheme(): "light" | "dark" {
   const theme = getCurrentTheme();
 
-  if (theme === 'system') {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (theme === "system") {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
     }
-    return 'light';
+    return "light";
   }
 
   return theme;
@@ -131,12 +133,12 @@ export function getResolvedTheme(): 'light' | 'dark' {
  * @param theme - Theme to set ('light', 'dark', or 'system')
  */
 export function setTheme(theme: Theme): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch (e) {
-    console.warn('Could not save theme preference:', e);
+    console.warn("Could not save theme preference:", e);
   }
 
   applyTheme(theme);
@@ -147,17 +149,17 @@ export function setTheme(theme: Theme): void {
  * @param theme - Theme to apply
  */
 export function applyTheme(theme: Theme): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const root = document.documentElement;
-  const resolvedTheme = theme === 'system' ? getResolvedTheme() : theme;
+  const resolvedTheme = theme === "system" ? getResolvedTheme() : theme;
 
-  if (resolvedTheme === 'dark') {
-    root.setAttribute('data-theme', 'dark');
-    root.style.colorScheme = 'dark';
+  if (resolvedTheme === "dark") {
+    root.setAttribute("data-theme", "dark");
+    root.style.colorScheme = "dark";
   } else {
-    root.setAttribute('data-theme', 'light');
-    root.style.colorScheme = 'light';
+    root.setAttribute("data-theme", "light");
+    root.style.colorScheme = "light";
   }
 }
 
@@ -165,9 +167,9 @@ export function applyTheme(theme: Theme): void {
  * Toggles between light and dark mode
  * Returns the new theme
  */
-export function toggleTheme(): 'light' | 'dark' {
+export function toggleTheme(): "light" | "dark" {
   const current = getResolvedTheme();
-  const next = current === 'dark' ? 'light' : 'dark';
+  const next = current === "dark" ? "light" : "dark";
   setTheme(next);
   return next;
 }
@@ -176,26 +178,28 @@ export function toggleTheme(): 'light' | 'dark' {
  * Listens for system theme changes and updates if user preference is 'system'
  * Returns cleanup function
  */
-export function watchSystemTheme(callback: (theme: 'light' | 'dark') => void): () => void {
-  if (typeof window === 'undefined' || !window.matchMedia) {
+export function watchSystemTheme(
+  callback: (theme: "light" | "dark") => void,
+): () => void {
+  if (typeof window === "undefined" || !window.matchMedia) {
     return () => {};
   }
 
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
   const handler = (e: MediaQueryListEvent | MediaQueryList) => {
     const currentPreference = getCurrentTheme();
-    if (currentPreference === 'system') {
-      const newTheme = e.matches ? 'dark' : 'light';
-      applyTheme('system');
+    if (currentPreference === "system") {
+      const newTheme = e.matches ? "dark" : "light";
+      applyTheme("system");
       callback(newTheme);
     }
   };
 
   // Modern browsers
   if (mediaQuery.addEventListener) {
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }
 
   // Legacy browsers

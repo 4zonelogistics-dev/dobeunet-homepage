@@ -57,7 +57,7 @@
     Activated via data-theme="dark" on root element
     All colors maintain WCAG AA contrast ratios against dark backgrounds
   */
-  [data-theme='dark'] {
+  [data-theme="dark"] {
     /* Dark Mode Backgrounds */
     --color-bg-primary: 15 23 42; /* #0f172a - slate-900 */
     --color-bg-secondary: 30 41 59; /* #1e293b - slate-800 */
@@ -168,7 +168,12 @@
   }
 
   /* Heading spacing for better hierarchy */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin-bottom: 0.75em;
   }
 
@@ -197,7 +202,8 @@
   }
 
   /* Ensure minimum touch target size */
-  button, a {
+  button,
+  a {
     min-height: 44px;
     min-width: 44px;
   }
@@ -278,11 +284,21 @@
   }
 
   /* Stagger animation delays */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
-  .delay-500 { animation-delay: 500ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  .delay-500 {
+    animation-delay: 500ms;
+  }
 
   /* Toast and notification animations */
   .animate-slide-in {
@@ -321,7 +337,8 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {

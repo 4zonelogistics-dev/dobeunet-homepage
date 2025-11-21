@@ -1,15 +1,33 @@
-import { CheckCircle2, TrendingDown, Clock, DollarSign, Target, Shield, FileText, Users, Zap } from 'lucide-react';
+import {
+  CheckCircle2,
+  TrendingDown,
+  Clock,
+  DollarSign,
+  Target,
+  Shield,
+  FileText,
+  Users,
+  Zap,
+} from "lucide-react";
 
 export default function Solutions() {
   return (
-    <section id="solutions" className="py-20 bg-slate-50 dark:bg-slate-800" aria-labelledby="solutions-heading">
+    <section
+      id="solutions"
+      className="py-20 bg-slate-50 dark:bg-slate-800"
+      aria-labelledby="solutions-heading"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 id="solutions-heading" className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-6 leading-[1.3]">
+          <h2
+            id="solutions-heading"
+            className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-6 leading-[1.3]"
+          >
             Software Built for Your Reality
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-[1.6]">
-            Specialized solutions for mid-market operators who need more than basic tools but can't justify enterprise pricing
+            Specialized solutions for mid-market operators who need more than
+            basic tools but can't justify enterprise pricing
           </p>
         </div>
 
@@ -31,11 +49,15 @@ export default function Solutions() {
                     <TrendingDown className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
                       30% food waste reduction in 60 days
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      Real-time tracking identifies waste patterns you didn't know existed
+                      Real-time tracking identifies waste patterns you didn't
+                      know existed
                     </p>
                   </div>
                 </div>
@@ -45,7 +67,10 @@ export default function Solutions() {
                     <Clock className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
                       100+ hours saved monthly on operations
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -59,7 +84,10 @@ export default function Solutions() {
                     <DollarSign className="w-5 h-5 text-cyan-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
                       2-3 month ROI with $20-50K annual savings per location
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -76,13 +104,16 @@ export default function Solutions() {
                 </h5>
                 <ul className="space-y-2">
                   {[
-                    'Food waste tracking & analytics',
-                    'Automated AP invoice processing',
-                    'Cross-location performance dashboards',
-                    'Vendor management & ordering',
-                    'Real-time cost monitoring'
+                    "Food waste tracking & analytics",
+                    "Automated AP invoice processing",
+                    "Cross-location performance dashboards",
+                    "Vendor management & ordering",
+                    "Real-time cost monitoring",
                   ].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 text-slate-700 dark:text-slate-300"
+                    >
                       <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </li>
@@ -109,7 +140,10 @@ export default function Solutions() {
                     <Shield className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
                       Centralized DVIR, training, and incident documentation
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -123,7 +157,10 @@ export default function Solutions() {
                     <FileText className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
                       Customizable curriculum with compliance templates
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
@@ -137,8 +174,12 @@ export default function Solutions() {
                     <Users className="w-5 h-5 text-cyan-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]" style={{ letterSpacing: '0.015em' }}>
-                      Single-person fleet management for 25-75 vehicle operations
+                    <h4
+                      className="font-semibold text-slate-900 dark:text-white mb-1 leading-[1.4]"
+                      style={{ letterSpacing: "0.015em" }}
+                    >
+                      Single-person fleet management for 25-75 vehicle
+                      operations
                     </h4>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
                       Designed for operators without dedicated safety staff
@@ -154,13 +195,16 @@ export default function Solutions() {
                 </h5>
                 <ul className="space-y-2">
                   {[
-                    'Digital DVIR management',
-                    'Driver training curriculum & tracking',
-                    'Incident & accident documentation',
-                    'DOT compliance checklists',
-                    'Safety performance analytics'
+                    "Digital DVIR management",
+                    "Driver training curriculum & tracking",
+                    "Incident & accident documentation",
+                    "DOT compliance checklists",
+                    "Safety performance analytics",
                   ].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 text-slate-700 dark:text-slate-300"
+                    >
                       <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </li>

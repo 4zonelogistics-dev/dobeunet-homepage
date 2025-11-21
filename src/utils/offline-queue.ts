@@ -9,7 +9,7 @@ interface QueuedRequest {
   maxRetries: number;
 }
 
-const QUEUE_STORAGE_KEY = 'dobeu-offline-queue';
+const QUEUE_STORAGE_KEY = "dobeu-offline-queue";
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 2000;
 
@@ -30,7 +30,7 @@ class OfflineQueue {
         this.queue = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[OfflineQueue] Failed to load queue:', error);
+      console.error("[OfflineQueue] Failed to load queue:", error);
       this.queue = [];
     }
   }
@@ -40,13 +40,13 @@ class OfflineQueue {
       localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(this.queue));
       this.notifyListeners();
     } catch (error) {
-      console.error('[OfflineQueue] Failed to save queue:', error);
+      console.error("[OfflineQueue] Failed to save queue:", error);
     }
   }
 
   private setupNetworkListeners(): void {
-    window.addEventListener('online', () => {
-      console.log('[OfflineQueue] Network restored, processing queue');
+    window.addEventListener("online", () => {
+      console.log("[OfflineQueue] Network restored, processing queue");
       this.processQueue();
     });
   }
@@ -55,7 +55,7 @@ class OfflineQueue {
     url: string,
     method: string,
     headers: Record<string, string> = {},
-    body?: unknown
+    body?: unknown,
   ): string {
     const id = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -67,7 +67,7 @@ class OfflineQueue {
       body: body ? JSON.stringify(body) : undefined,
       timestamp: Date.now(),
       retryCount: 0,
-      maxRetries: MAX_RETRY_ATTEMPTS
+      maxRetries: MAX_RETRY_ATTEMPTS,
     };
 
     this.queue.push(request);
@@ -98,11 +98,17 @@ class OfflineQueue {
         request.retryCount++;
 
         if (request.retryCount >= request.maxRetries) {
-          console.error('[OfflineQueue] Max retries reached for request:', request.id);
+          console.error(
+            "[OfflineQueue] Max retries reached for request:",
+            request.id,
+          );
           this.queue.shift();
           this.saveQueue();
         } else {
-          console.warn('[OfflineQueue] Request failed, will retry:', request.id);
+          console.warn(
+            "[OfflineQueue] Request failed, will retry:",
+            request.id,
+          );
           await this.delay(RETRY_DELAY_MS * request.retryCount);
         }
       }
@@ -115,7 +121,7 @@ class OfflineQueue {
     const response = await fetch(request.url, {
       method: request.method,
       headers: request.headers,
-      body: request.body
+      body: request.body,
     });
 
     if (!response.ok) {
@@ -124,18 +130,18 @@ class OfflineQueue {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   subscribe(listener: (queue: QueuedRequest[]) => void): () => void {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener([...this.queue]));
+    this.listeners.forEach((listener) => listener([...this.queue]));
   }
 
   getQueueSize(): number {
@@ -158,12 +164,14 @@ export function enqueueRequest(
   url: string,
   method: string,
   headers?: Record<string, string>,
-  body?: unknown
+  body?: unknown,
 ): string {
   return offlineQueue.enqueue(url, method, headers, body);
 }
 
-export function useOfflineQueue(callback: (queue: readonly QueuedRequest[]) => void): () => void {
+export function useOfflineQueue(
+  callback: (queue: readonly QueuedRequest[]) => void,
+): () => void {
   return offlineQueue.subscribe(callback);
 }
 

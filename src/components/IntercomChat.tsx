@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 /**
  * Intercom Chat Component
@@ -14,28 +14,32 @@ export default function IntercomChat() {
     const loadIntercom = async () => {
       try {
         // Wait for page to be fully loaded before loading Intercom
-        if (document.readyState !== 'complete') {
-          await new Promise(resolve => {
-            window.addEventListener('load', resolve, { once: true });
+        if (document.readyState !== "complete") {
+          await new Promise((resolve) => {
+            window.addEventListener("load", resolve, { once: true });
           });
         }
 
         // Additional delay to ensure page is fully interactive
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Dynamically import Intercom SDK to avoid blocking main bundle
-        const { default: Intercom } = await import('@intercom/messenger-js-sdk');
+        const { default: Intercom } = await import(
+          "@intercom/messenger-js-sdk"
+        );
 
         // Initialize Intercom with app ID
         Intercom({
-          app_id: 'xu0gfiqb',
+          app_id: "xu0gfiqb",
         });
 
-        console.info('[Intercom] Messenger initialized successfully (deferred)');
+        console.info(
+          "[Intercom] Messenger initialized successfully (deferred)",
+        );
       } catch (error) {
         // Gracefully handle Intercom initialization errors
         // Don't break the app if Intercom fails to load or is blocked
-        console.warn('[Intercom] Failed to initialize (non-critical):', error);
+        console.warn("[Intercom] Failed to initialize (non-critical):", error);
       }
     };
 

@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface LegalDocumentLayoutProps {
   readonly title: string;
@@ -8,7 +8,11 @@ interface LegalDocumentLayoutProps {
   readonly children: ReactNode;
 }
 
-export default function LegalDocumentLayout({ title, lastUpdated, children }: LegalDocumentLayoutProps) {
+export default function LegalDocumentLayout({
+  title,
+  lastUpdated,
+  children,
+}: LegalDocumentLayoutProps) {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -26,7 +30,14 @@ export default function LegalDocumentLayout({ title, lastUpdated, children }: Le
               {title}
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Last Updated: <time dateTime={lastUpdated}>{new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+              Last Updated:{" "}
+              <time dateTime={lastUpdated}>
+                {new Date(lastUpdated).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </time>
             </p>
           </header>
 

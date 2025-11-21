@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface NetworkStatus {
   isOnline: boolean;
@@ -9,7 +9,7 @@ interface NetworkStatus {
 
 export function useNetworkStatus(): NetworkStatus {
   const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
+    typeof navigator !== "undefined" ? navigator.onLine : true,
   );
   const [wasOffline, setWasOffline] = useState<boolean>(false);
   const [connectionInfo, setConnectionInfo] = useState<{
@@ -29,12 +29,14 @@ export function useNetworkStatus(): NetworkStatus {
     };
 
     const updateConnectionInfo = (): void => {
-      const connection = (navigator as Navigator & {
-        connection?: {
-          downlink?: number;
-          effectiveType?: string;
-        };
-      }).connection;
+      const connection = (
+        navigator as Navigator & {
+          connection?: {
+            downlink?: number;
+            effectiveType?: string;
+          };
+        }
+      ).connection;
 
       if (connection) {
         setConnectionInfo({
@@ -44,24 +46,26 @@ export function useNetworkStatus(): NetworkStatus {
       }
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-    const connection = (navigator as Navigator & {
-      connection?: {
-        addEventListener?: (event: string, handler: () => void) => void;
-      };
-    }).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: {
+          addEventListener?: (event: string, handler: () => void) => void;
+        };
+      }
+    ).connection;
 
     if (connection && connection.addEventListener) {
-      connection.addEventListener('change', updateConnectionInfo);
+      connection.addEventListener("change", updateConnectionInfo);
     }
 
     updateConnectionInfo();
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 

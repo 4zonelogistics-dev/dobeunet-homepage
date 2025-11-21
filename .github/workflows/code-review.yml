@@ -75,7 +75,7 @@ jobs:
       - name: Check for secrets in code
         run: |
           echo "Checking for potential secrets..."
-          if grep -r -E "(password|secret|api[_-]?key|token|mongodb://|postgres://).*=[\"']" src/ --exclude-dir=node_modules; then
+          if grep -r -E "(password|secret|api[_-]?key|token|mongodb://|postgres://).*=[\"']" src/ --exclude-dir=node_modules 2>/dev/null; then
             echo "⚠️ Potential hardcoded secrets found!"
             echo "Review the matches above"
             exit 1
@@ -96,7 +96,7 @@ jobs:
           
           found=0
           for pattern in "${dangerous_patterns[@]}"; do
-            if grep -r -E "$pattern" src/ --exclude-dir=node_modules; then
+            if grep -r -E "$pattern" src/ --exclude-dir=node_modules 2>/dev/null; then
               echo "⚠️ Dangerous pattern found: $pattern"
               found=1
             fi
@@ -112,12 +112,13 @@ jobs:
       - name: Check environment variables
         run: |
           echo "Checking for proper environment variable usage..."
-          if grep -r "import\.meta\.env\." src/ --exclude-dir=node_modules | grep -v "PROD"; then
+          if grep -r "import\.meta\.env\." src/ --exclude-dir=node_modules 2>/dev/null | grep -v "PROD" 2>/dev/null; then
             echo "⚠️ Warning: Frontend environment variables detected"
             echo "Ensure no secrets are exposed to frontend"
           else
             echo "✅ No frontend environment variables with secrets"
           fi
+        continue-on-error: true
 
   # Code quality metrics
   code-quality-metrics:
@@ -191,7 +192,7 @@ jobs:
       - name: Check for console.log in production
         run: |
           echo "Checking for console.log statements..."
-          if grep -r "console\.log\|console\.debug\|console\.info" src/ --exclude-dir=node_modules --exclude="*.test.*"; then
+          if grep -r "console\.log\|console\.debug\|console\.info" src/ --exclude-dir=node_modules --exclude="*.test.*" 2>/dev/null; then
             echo "⚠️ Warning: console.log found (should be removed for production)"
             echo "These will be stripped by build, but consider removing them"
           else
@@ -208,7 +209,7 @@ jobs:
       - name: Check for TODOs and FIXMEs
         run: |
           echo "Checking for TODO/FIXME comments..."
-          todos=$(grep -r -n "TODO\|FIXME" src/ --exclude-dir=node_modules || true)
+          todos=$(grep -r -n "TODO\|FIXME" src/ --exclude-dir=node_modules 2>/dev/null || true)
           if [ -n "$todos" ]; then
             echo "📝 TODOs found:"
             echo "$todos"

@@ -1,11 +1,11 @@
-import { logError } from './error-logger';
-import { createAppError } from '../types/errors';
+import { logError } from "./error-logger";
+import { createAppError } from "../types/errors";
 
 export enum ConnectionStatus {
-  HEALTHY = 'HEALTHY',
-  DEGRADED = 'DEGRADED',
-  UNHEALTHY = 'UNHEALTHY',
-  UNKNOWN = 'UNKNOWN'
+  HEALTHY = "HEALTHY",
+  DEGRADED = "DEGRADED",
+  UNHEALTHY = "UNHEALTHY",
+  UNKNOWN = "UNKNOWN",
 }
 
 interface ConnectionHealth {
@@ -22,7 +22,7 @@ class ConnectionMonitor {
     lastCheck: 0,
     latency: null,
     consecutiveFailures: 0,
-    message: 'Not yet checked'
+    message: "Not yet checked",
   };
 
   private listeners: Array<(health: ConnectionHealth) => void> = [];
@@ -42,7 +42,7 @@ class ConnectionMonitor {
       lastCheck: Date.now(),
       latency: null,
       consecutiveFailures: 0,
-      message: 'Initializing...'
+      message: "Initializing...",
     };
 
     // First check after a delay to not block initial render
@@ -69,12 +69,15 @@ class ConnectionMonitor {
     try {
       // Health check via Netlify Function (MongoDB)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Health check timeout')), this.HEALTH_CHECK_TIMEOUT_MS);
+        setTimeout(
+          () => reject(new Error("Health check timeout")),
+          this.HEALTH_CHECK_TIMEOUT_MS,
+        );
       });
 
       // Ping a simple health endpoint (the function itself validates connection)
-      const healthCheckPromise = fetch('/.netlify/functions/submit-lead', {
-        method: 'OPTIONS', // OPTIONS request for CORS check
+      const healthCheckPromise = fetch("/.netlify/functions/submit-lead", {
+        method: "OPTIONS", // OPTIONS request for CORS check
       });
 
       await Promise.race([healthCheckPromise, timeoutPromise]);
@@ -86,28 +89,35 @@ class ConnectionMonitor {
         lastCheck: Date.now(),
         latency,
         consecutiveFailures: 0,
-        message: this.getStatusMessage(this.determineStatus(latency, 0), latency)
+        message: this.getStatusMessage(
+          this.determineStatus(latency, 0),
+          latency,
+        ),
       };
     } catch (error) {
       this.health.consecutiveFailures++;
 
-      const newStatus = this.health.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES
-        ? ConnectionStatus.UNHEALTHY
-        : ConnectionStatus.DEGRADED;
+      const newStatus =
+        this.health.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES
+          ? ConnectionStatus.UNHEALTHY
+          : ConnectionStatus.DEGRADED;
 
       this.health = {
         status: newStatus,
         lastCheck: Date.now(),
         latency: null,
         consecutiveFailures: this.health.consecutiveFailures,
-        message: this.getStatusMessage(newStatus, null)
+        message: this.getStatusMessage(newStatus, null),
       };
 
       if (this.health.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES) {
         const appError = createAppError(
-          error instanceof Error ? error.message : 'Health check failed'
+          error instanceof Error ? error.message : "Health check failed",
         );
-        logError(appError, { healthCheck: true, consecutiveFailures: this.health.consecutiveFailures });
+        logError(appError, {
+          healthCheck: true,
+          consecutiveFailures: this.health.consecutiveFailures,
+        });
       }
     }
 
@@ -131,18 +141,21 @@ class ConnectionMonitor {
     return ConnectionStatus.DEGRADED;
   }
 
-  private getStatusMessage(status: ConnectionStatus, latency: number | null): string {
+  private getStatusMessage(
+    status: ConnectionStatus,
+    latency: number | null,
+  ): string {
     switch (status) {
       case ConnectionStatus.HEALTHY:
         return `Connection is healthy (${latency}ms)`;
       case ConnectionStatus.DEGRADED:
         return latency
           ? `Connection is slow (${latency}ms)`
-          : 'Connection issues detected';
+          : "Connection issues detected";
       case ConnectionStatus.UNHEALTHY:
-        return 'Unable to connect to database';
+        return "Unable to connect to database";
       case ConnectionStatus.UNKNOWN:
-        return 'Connection status unknown';
+        return "Connection status unknown";
     }
   }
 
@@ -159,12 +172,12 @@ class ConnectionMonitor {
     listener(this.health);
 
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener({ ...this.health }));
+    this.listeners.forEach((listener) => listener({ ...this.health }));
   }
 }
 
@@ -187,7 +200,7 @@ export function isConnectionHealthy(): boolean {
 }
 
 export function subscribeToConnectionHealth(
-  listener: (health: ConnectionHealth) => void
+  listener: (health: ConnectionHealth) => void,
 ): () => void {
   return connectionMonitor.subscribe(listener);
 }

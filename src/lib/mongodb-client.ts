@@ -1,6 +1,6 @@
 /**
  * MongoDB Client for Frontend
- * 
+ *
  * This module provides a client-side interface to interact with MongoDB
  * through Netlify Functions (serverless backend)
  */
@@ -10,7 +10,7 @@ export interface LeadLocation {
   state: string;
   postal_code: string;
   coordinates?: {
-    type: 'Point';
+    type: "Point";
     coordinates: [number, number];
   };
 }
@@ -27,23 +27,29 @@ export interface Lead {
   name: string;
   email: string;
   company: string;
-  business_type: 'restaurant' | 'fleet' | 'other';
+  business_type: "restaurant" | "fleet" | "other";
   phone: string;
   message?: string;
-  submission_type: 'strategy' | 'pilot';
+  submission_type: "strategy" | "pilot";
   location: LeadLocation;
   estimated_locations?: number;
   headcount?: number;
   marketing?: LeadMarketing;
   score?: number;
-  priority?: 'hot' | 'warm' | 'nurture';
+  priority?: "hot" | "warm" | "nurture";
   created_at?: string;
   updated_at?: string;
 }
 
 export interface ErrorLog {
-  error_type: 'NETWORK' | 'VALIDATION' | 'DATABASE' | 'AUTHENTICATION' | 'UNEXPECTED' | 'TIMEOUT';
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+  error_type:
+    | "NETWORK"
+    | "VALIDATION"
+    | "DATABASE"
+    | "AUTHENTICATION"
+    | "UNEXPECTED"
+    | "TIMEOUT";
+  severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
   message: string;
   user_message: string;
   code?: string;
@@ -58,13 +64,18 @@ export interface ErrorLog {
  * Submit a lead to MongoDB via Netlify Function
  */
 export async function submitLead(
-  lead: Omit<Lead, 'id' | 'created_at' | 'updated_at' | 'score' | 'priority'>
-): Promise<{ success: boolean; error?: string; score?: number; priority?: Lead['priority'] }> {
+  lead: Omit<Lead, "id" | "created_at" | "updated_at" | "score" | "priority">,
+): Promise<{
+  success: boolean;
+  error?: string;
+  score?: number;
+  priority?: Lead["priority"];
+}> {
   try {
-    const response = await fetch('/.netlify/functions/submit-lead', {
-      method: 'POST',
+    const response = await fetch("/.netlify/functions/submit-lead", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(lead),
     });
@@ -72,8 +83,8 @@ export async function submitLead(
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Error submitting lead:', data);
-      return { success: false, error: data.error || 'Failed to submit lead' };
+      console.error("Error submitting lead:", data);
+      return { success: false, error: data.error || "Failed to submit lead" };
     }
 
     return {
@@ -82,8 +93,8 @@ export async function submitLead(
       priority: data.priority,
     };
   } catch (error) {
-    console.error('Unexpected error submitting lead:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    console.error("Unexpected error submitting lead:", error);
+    return { success: false, error: "An unexpected error occurred" };
   }
 }
 
@@ -93,19 +104,19 @@ export async function submitLead(
 export async function logError(errorLog: ErrorLog): Promise<void> {
   try {
     // Add user agent if not provided
-    if (!errorLog.user_agent && typeof navigator !== 'undefined') {
+    if (!errorLog.user_agent && typeof navigator !== "undefined") {
       errorLog.user_agent = navigator.userAgent;
     }
 
     // Add current URL if not provided
-    if (!errorLog.url && typeof window !== 'undefined') {
+    if (!errorLog.url && typeof window !== "undefined") {
       errorLog.url = window.location.href;
     }
 
-    await fetch('/.netlify/functions/log-error', {
-      method: 'POST',
+    await fetch("/.netlify/functions/log-error", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(errorLog),
     });
@@ -113,7 +124,7 @@ export async function logError(errorLog: ErrorLog): Promise<void> {
     // Don't throw if error logging fails - we don't want to break the app
   } catch (error) {
     // Silently fail - error logging should never break the app
-    console.error('Failed to log error to server:', error);
+    console.error("Failed to log error to server:", error);
   }
 }
 
@@ -126,7 +137,7 @@ export async function withRetry<T>(
     maxAttempts?: number;
     initialDelay?: number;
     shouldRetry?: (error: unknown) => boolean;
-  } = {}
+  } = {},
 ): Promise<T> {
   const {
     maxAttempts = 3,
@@ -148,7 +159,7 @@ export async function withRetry<T>(
 
       // Exponential backoff: 1s, 2s, 4s
       const delay = initialDelay * Math.pow(2, attempt - 1);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -161,7 +172,7 @@ export async function withRetry<T>(
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
-  timeoutError: Error
+  timeoutError: Error,
 ): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(timeoutError), timeoutMs);
@@ -178,7 +189,7 @@ export async function mongoQuery<T>(
   options: {
     timeoutMs?: number;
     maxAttempts?: number;
-  } = {}
+  } = {},
 ): Promise<{ data: T | null; error: string | null }> {
   const { timeoutMs = 10000, maxAttempts = 3 } = options;
 
@@ -188,28 +199,27 @@ export async function mongoQuery<T>(
         return await withTimeout(
           queryFn(),
           timeoutMs,
-          new Error('Request timeout')
+          new Error("Request timeout"),
         );
       },
       {
         maxAttempts,
         shouldRetry: (error) => {
           if (error instanceof Error) {
-            const retryableMessages = ['fetch', 'network', 'timeout'];
-            return retryableMessages.some(msg =>
-              error.message.toLowerCase().includes(msg.toLowerCase())
+            const retryableMessages = ["fetch", "network", "timeout"];
+            return retryableMessages.some((msg) =>
+              error.message.toLowerCase().includes(msg.toLowerCase()),
             );
           }
           return false;
         },
-      }
+      },
     );
 
     return { data: result, error: null };
   } catch (error) {
-    const errorMessage = error instanceof Error
-      ? error.message
-      : 'An unexpected error occurred';
+    const errorMessage =
+      error instanceof Error ? error.message : "An unexpected error occurred";
 
     return {
       data: null,
@@ -217,4 +227,3 @@ export async function mongoQuery<T>(
     };
   }
 }
-

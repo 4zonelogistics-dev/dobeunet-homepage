@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from "react";
 
 export interface ValidationRule<T = string> {
   validate: (value: T) => boolean;
@@ -38,18 +38,18 @@ function normalizeEmail(email: string): string {
 }
 
 function normalizePhone(phone: string): string {
-  return phone.trim().replace(/\D/g, '');
+  return phone.trim().replace(/\D/g, "");
 }
 
 function validateField(value: string, rules: FieldValidation): string {
   const trimmedValue = value.trim();
 
   if (rules.required && !trimmedValue) {
-    return 'This field is required';
+    return "This field is required";
   }
 
   if (!trimmedValue) {
-    return '';
+    return "";
   }
 
   if (rules.minLength && trimmedValue.length < rules.minLength) {
@@ -61,15 +61,15 @@ function validateField(value: string, rules: FieldValidation): string {
   }
 
   if (rules.email && !EMAIL_REGEX.test(normalizeEmail(trimmedValue))) {
-    return 'Please enter a valid email address';
+    return "Please enter a valid email address";
   }
 
   if (rules.phone && !PHONE_REGEX.test(trimmedValue)) {
-    return 'Please enter a valid phone number';
+    return "Please enter a valid phone number";
   }
 
   if (rules.pattern && !rules.pattern.test(trimmedValue)) {
-    return 'Please enter a valid value';
+    return "Please enter a valid value";
   }
 
   if (rules.custom) {
@@ -80,16 +80,16 @@ function validateField(value: string, rules: FieldValidation): string {
     }
   }
 
-  return '';
+  return "";
 }
 
 export function useFormValidation(config: FormValidationConfig) {
   const [formState, setFormState] = useState<FormState>(() => {
     const initialState: FormState = {};
-    Object.keys(config).forEach(field => {
+    Object.keys(config).forEach((field) => {
       initialState[field] = {
-        value: '',
-        error: '',
+        value: "",
+        error: "",
         touched: false,
         dirty: false,
       };
@@ -98,7 +98,7 @@ export function useFormValidation(config: FormValidationConfig) {
   });
 
   const setValue = useCallback((field: string, value: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
@@ -109,7 +109,7 @@ export function useFormValidation(config: FormValidationConfig) {
   }, []);
 
   const setTouched = useCallback((field: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
@@ -118,32 +118,35 @@ export function useFormValidation(config: FormValidationConfig) {
     }));
   }, []);
 
-  const validateFieldByName = useCallback((field: string): boolean => {
-    const fieldState = formState[field];
-    const fieldConfig = config[field];
+  const validateFieldByName = useCallback(
+    (field: string): boolean => {
+      const fieldState = formState[field];
+      const fieldConfig = config[field];
 
-    if (!fieldState || !fieldConfig) {
-      return true;
-    }
+      if (!fieldState || !fieldConfig) {
+        return true;
+      }
 
-    const error = validateField(fieldState.value, fieldConfig);
+      const error = validateField(fieldState.value, fieldConfig);
 
-    setFormState(prev => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        error,
-      },
-    }));
+      setFormState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error,
+        },
+      }));
 
-    return !error;
-  }, [formState, config]);
+      return !error;
+    },
+    [formState, config],
+  );
 
   const validateForm = useCallback((): boolean => {
     let isValid = true;
     const newState = { ...formState };
 
-    Object.keys(config).forEach(field => {
+    Object.keys(config).forEach((field) => {
       const error = validateField(formState[field].value, config[field]);
       newState[field] = {
         ...newState[field],
@@ -161,10 +164,10 @@ export function useFormValidation(config: FormValidationConfig) {
 
   const resetForm = useCallback(() => {
     const resetState: FormState = {};
-    Object.keys(config).forEach(field => {
+    Object.keys(config).forEach((field) => {
       resetState[field] = {
-        value: '',
-        error: '',
+        value: "",
+        error: "",
         touched: false,
         dirty: false,
       };
@@ -172,22 +175,29 @@ export function useFormValidation(config: FormValidationConfig) {
     setFormState(resetState);
   }, [config]);
 
-  const getFieldProps = useCallback((field: string) => {
-    return {
-      value: formState[field]?.value || '',
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setValue(field, e.target.value);
-      },
-      onBlur: () => {
-        setTouched(field);
-        validateFieldByName(field);
-      },
-    };
-  }, [formState, setValue, setTouched, validateFieldByName]);
+  const getFieldProps = useCallback(
+    (field: string) => {
+      return {
+        value: formState[field]?.value || "",
+        onChange: (
+          e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+          >,
+        ) => {
+          setValue(field, e.target.value);
+        },
+        onBlur: () => {
+          setTouched(field);
+          validateFieldByName(field);
+        },
+      };
+    },
+    [formState, setValue, setTouched, validateFieldByName],
+  );
 
   const getNormalizedValues = useCallback(() => {
     const normalized: Record<string, string> = {};
-    Object.keys(formState).forEach(field => {
+    Object.keys(formState).forEach((field) => {
       let value = formState[field].value.trim();
       if (config[field]?.email) {
         value = normalizeEmail(value);
@@ -200,11 +210,11 @@ export function useFormValidation(config: FormValidationConfig) {
   }, [formState, config]);
 
   const isValid = useMemo(() => {
-    return Object.values(formState).every(field => !field.error);
+    return Object.values(formState).every((field) => !field.error);
   }, [formState]);
 
   const isDirty = useMemo(() => {
-    return Object.values(formState).some(field => field.dirty);
+    return Object.values(formState).some((field) => field.dirty);
   }, [formState]);
 
   return {

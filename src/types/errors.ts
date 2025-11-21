@@ -1,17 +1,17 @@
 export enum ErrorType {
-  NETWORK = 'NETWORK',
-  VALIDATION = 'VALIDATION',
-  DATABASE = 'DATABASE',
-  AUTHENTICATION = 'AUTHENTICATION',
-  UNEXPECTED = 'UNEXPECTED',
-  TIMEOUT = 'TIMEOUT',
+  NETWORK = "NETWORK",
+  VALIDATION = "VALIDATION",
+  DATABASE = "DATABASE",
+  AUTHENTICATION = "AUTHENTICATION",
+  UNEXPECTED = "UNEXPECTED",
+  TIMEOUT = "TIMEOUT",
 }
 
 export enum ErrorSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL',
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
 }
 
 export interface AppError {
@@ -30,9 +30,12 @@ export class NetworkError extends Error {
   severity = ErrorSeverity.ERROR;
   retryable = true;
 
-  constructor(message: string, public userMessage: string = 'Unable to connect. Please check your internet connection.') {
+  constructor(
+    message: string,
+    public userMessage: string = "Unable to connect. Please check your internet connection.",
+  ) {
     super(message);
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
   }
 }
 
@@ -41,9 +44,13 @@ export class ValidationError extends Error {
   severity = ErrorSeverity.WARNING;
   retryable = false;
 
-  constructor(message: string, public userMessage: string, public field?: string) {
+  constructor(
+    message: string,
+    public userMessage: string,
+    public field?: string,
+  ) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -52,9 +59,13 @@ export class DatabaseError extends Error {
   severity = ErrorSeverity.ERROR;
   retryable = false;
 
-  constructor(message: string, public userMessage: string = 'A database error occurred. Please try again.', public code?: string) {
+  constructor(
+    message: string,
+    public userMessage: string = "A database error occurred. Please try again.",
+    public code?: string,
+  ) {
     super(message);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 
@@ -63,9 +74,12 @@ export class TimeoutError extends Error {
   severity = ErrorSeverity.ERROR;
   retryable = true;
 
-  constructor(message: string, public userMessage: string = 'The request took too long. Please try again.') {
+  constructor(
+    message: string,
+    public userMessage: string = "The request took too long. Please try again.",
+  ) {
     super(message);
-    this.name = 'TimeoutError';
+    this.name = "TimeoutError";
   }
 }
 
@@ -74,20 +88,25 @@ export class UnexpectedError extends Error {
   severity = ErrorSeverity.CRITICAL;
   retryable = true;
 
-  constructor(message: string, public userMessage: string = 'An unexpected error occurred. Please refresh and try again.') {
+  constructor(
+    message: string,
+    public userMessage: string = "An unexpected error occurred. Please refresh and try again.",
+  ) {
     super(message);
-    this.name = 'UnexpectedError';
+    this.name = "UnexpectedError";
   }
 }
 
 export function createAppError(error: unknown): AppError {
   const timestamp = new Date().toISOString();
 
-    if (error instanceof NetworkError ||
-        error instanceof ValidationError ||
-        error instanceof DatabaseError ||
-        error instanceof TimeoutError ||
-        error instanceof UnexpectedError) {
+  if (
+    error instanceof NetworkError ||
+    error instanceof ValidationError ||
+    error instanceof DatabaseError ||
+    error instanceof TimeoutError ||
+    error instanceof UnexpectedError
+  ) {
     return {
       type: error.type,
       severity: error.severity,
@@ -95,7 +114,7 @@ export function createAppError(error: unknown): AppError {
       userMessage: error.userMessage,
       timestamp,
       retryable: error.retryable,
-      code: 'code' in error ? error.code : undefined,
+      code: "code" in error ? error.code : undefined,
     };
   }
 
@@ -104,7 +123,7 @@ export function createAppError(error: unknown): AppError {
       type: ErrorType.UNEXPECTED,
       severity: ErrorSeverity.ERROR,
       message: error.message,
-      userMessage: 'Something went wrong. Please try again.',
+      userMessage: "Something went wrong. Please try again.",
       timestamp,
       retryable: true,
     };
@@ -114,7 +133,7 @@ export function createAppError(error: unknown): AppError {
     type: ErrorType.UNEXPECTED,
     severity: ErrorSeverity.ERROR,
     message: String(error),
-    userMessage: 'An unknown error occurred.',
+    userMessage: "An unknown error occurred.",
     timestamp,
     retryable: true,
   };

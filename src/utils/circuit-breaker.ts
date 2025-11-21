@@ -1,7 +1,7 @@
 export enum CircuitState {
-  CLOSED = 'CLOSED',
-  OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN'
+  CLOSED = "CLOSED",
+  OPEN = "OPEN",
+  HALF_OPEN = "HALF_OPEN",
 }
 
 interface CircuitBreakerOptions {
@@ -25,14 +25,14 @@ export class CircuitBreaker {
       successThreshold: options.successThreshold ?? 2,
       timeout: options.timeout ?? 60000,
       resetTimeout: options.resetTimeout ?? 30000,
-      onStateChange: options.onStateChange ?? (() => {})
+      onStateChange: options.onStateChange ?? (() => {}),
     };
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
-        throw new Error('Circuit breaker is OPEN. Service unavailable.');
+        throw new Error("Circuit breaker is OPEN. Service unavailable.");
       }
       this.transitionTo(CircuitState.HALF_OPEN);
     }
@@ -93,7 +93,10 @@ export class CircuitBreaker {
 
 const circuitBreakers = new Map<string, CircuitBreaker>();
 
-export function getCircuitBreaker(name: string, options?: CircuitBreakerOptions): CircuitBreaker {
+export function getCircuitBreaker(
+  name: string,
+  options?: CircuitBreakerOptions,
+): CircuitBreaker {
   if (!circuitBreakers.has(name)) {
     circuitBreakers.set(name, new CircuitBreaker(options));
   }
@@ -108,5 +111,5 @@ export function resetCircuitBreaker(name: string): void {
 }
 
 export function resetAllCircuitBreakers(): void {
-  circuitBreakers.forEach(breaker => breaker.reset());
+  circuitBreakers.forEach((breaker) => breaker.reset());
 }

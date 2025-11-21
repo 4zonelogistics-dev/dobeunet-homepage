@@ -7,35 +7,39 @@ export interface RetryOptions {
   onRetry?: (error: unknown, attempt: number, delay: number) => void;
 }
 
-const DEFAULT_OPTIONS: Required<Omit<RetryOptions, 'onRetry'>> = {
+const DEFAULT_OPTIONS: Required<Omit<RetryOptions, "onRetry">> = {
   maxAttempts: 3,
   initialDelay: 1000,
   maxDelay: 10000,
   backoffMultiplier: 2,
   shouldRetry: (error: unknown) => {
     if (error instanceof Error) {
-      const networkErrors = ['fetch', 'network', 'timeout', 'connection'];
-      return networkErrors.some(keyword =>
-        error.message.toLowerCase().includes(keyword)
+      const networkErrors = ["fetch", "network", "timeout", "connection"];
+      return networkErrors.some((keyword) =>
+        error.message.toLowerCase().includes(keyword),
       );
     }
     return false;
   },
 };
 
-function calculateDelay(attempt: number, options: Required<Omit<RetryOptions, 'onRetry'>>): number {
-  const exponentialDelay = options.initialDelay * Math.pow(options.backoffMultiplier, attempt);
+function calculateDelay(
+  attempt: number,
+  options: Required<Omit<RetryOptions, "onRetry">>,
+): number {
+  const exponentialDelay =
+    options.initialDelay * Math.pow(options.backoffMultiplier, attempt);
   const jitter = Math.random() * 0.3 * exponentialDelay;
   return Math.min(exponentialDelay + jitter, options.maxDelay);
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<T> {
   const config = { ...DEFAULT_OPTIONS, ...options };
   let lastError: unknown;
@@ -68,7 +72,7 @@ export async function withRetry<T>(
 
 export function createRetryableFunction<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): (...args: T) => Promise<R> {
   return (...args: T) => withRetry(() => fn(...args), options);
 }
@@ -76,11 +80,13 @@ export function createRetryableFunction<T extends unknown[], R>(
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
-  timeoutError?: Error
+  timeoutError?: Error,
 ): Promise<T> {
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(() => {
-      reject(timeoutError || new Error(`Operation timed out after ${timeoutMs}ms`));
+      reject(
+        timeoutError || new Error(`Operation timed out after ${timeoutMs}ms`),
+      );
     }, timeoutMs);
   });
 
@@ -90,10 +96,7 @@ export async function withTimeout<T>(
 export function withRetryAndTimeout<T>(
   fn: () => Promise<T>,
   timeoutMs: number,
-  retryOptions: RetryOptions = {}
+  retryOptions: RetryOptions = {},
 ): Promise<T> {
-  return withRetry(
-    () => withTimeout(fn(), timeoutMs),
-    retryOptions
-  );
+  return withRetry(() => withTimeout(fn(), timeoutMs), retryOptions);
 }

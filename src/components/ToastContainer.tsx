@@ -1,9 +1,13 @@
-import { useState, useCallback, createContext, ReactNode } from 'react';
-import Toast, { ToastProps } from './Toast';
-import { ErrorSeverity } from '../types/errors';
+import { useState, useCallback, createContext, ReactNode } from "react";
+import Toast, { ToastProps } from "./Toast";
+import { ErrorSeverity } from "../types/errors";
 
 interface ToastContextValue {
-  showToast: (message: string, severity: ErrorSeverity, duration?: number) => void;
+  showToast: (
+    message: string,
+    severity: ErrorSeverity,
+    duration?: number,
+  ) => void;
   showInfo: (message: string, duration?: number) => void;
   showSuccess: (message: string, duration?: number) => void;
   showWarning: (message: string, duration?: number) => void;
@@ -11,14 +15,16 @@ interface ToastContextValue {
   showCritical: (message: string, duration?: number) => void;
 }
 
-export const ToastContext = createContext<ToastContextValue | undefined>(undefined);
+export const ToastContext = createContext<ToastContextValue | undefined>(
+  undefined,
+);
 
 interface ToastProviderProps {
   children: ReactNode;
   maxToasts?: number;
 }
 
-interface ToastItem extends Omit<ToastProps, 'onClose'> {
+interface ToastItem extends Omit<ToastProps, "onClose"> {
   id: string;
 }
 
@@ -26,38 +32,56 @@ export function ToastProvider({ children, maxToasts = 5 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const showToast = useCallback((message: string, severity: ErrorSeverity, duration = 5000) => {
-    const id = `toast-${Date.now()}-${Math.random()}`;
-    const newToast: ToastItem = { id, message, severity, duration };
+  const showToast = useCallback(
+    (message: string, severity: ErrorSeverity, duration = 5000) => {
+      const id = `toast-${Date.now()}-${Math.random()}`;
+      const newToast: ToastItem = { id, message, severity, duration };
 
-    setToasts(prev => {
-      const updated = [...prev, newToast];
-      return updated.slice(-maxToasts);
-    });
-  }, [maxToasts]);
+      setToasts((prev) => {
+        const updated = [...prev, newToast];
+        return updated.slice(-maxToasts);
+      });
+    },
+    [maxToasts],
+  );
 
-  const showInfo = useCallback((message: string, duration?: number) => {
-    showToast(message, ErrorSeverity.INFO, duration);
-  }, [showToast]);
+  const showInfo = useCallback(
+    (message: string, duration?: number) => {
+      showToast(message, ErrorSeverity.INFO, duration);
+    },
+    [showToast],
+  );
 
-  const showSuccess = useCallback((message: string, duration?: number) => {
-    showToast(message, ErrorSeverity.INFO, duration);
-  }, [showToast]);
+  const showSuccess = useCallback(
+    (message: string, duration?: number) => {
+      showToast(message, ErrorSeverity.INFO, duration);
+    },
+    [showToast],
+  );
 
-  const showWarning = useCallback((message: string, duration?: number) => {
-    showToast(message, ErrorSeverity.WARNING, duration);
-  }, [showToast]);
+  const showWarning = useCallback(
+    (message: string, duration?: number) => {
+      showToast(message, ErrorSeverity.WARNING, duration);
+    },
+    [showToast],
+  );
 
-  const showError = useCallback((message: string, duration?: number) => {
-    showToast(message, ErrorSeverity.ERROR, duration);
-  }, [showToast]);
+  const showError = useCallback(
+    (message: string, duration?: number) => {
+      showToast(message, ErrorSeverity.ERROR, duration);
+    },
+    [showToast],
+  );
 
-  const showCritical = useCallback((message: string, duration?: number) => {
-    showToast(message, ErrorSeverity.CRITICAL, duration);
-  }, [showToast]);
+  const showCritical = useCallback(
+    (message: string, duration?: number) => {
+      showToast(message, ErrorSeverity.CRITICAL, duration);
+    },
+    [showToast],
+  );
 
   const value: ToastContextValue = {
     showToast,
@@ -78,7 +102,7 @@ export function ToastProvider({ children, maxToasts = 5 }: ToastProviderProps) {
         role="region"
         aria-label="Notifications"
       >
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <Toast key={toast.id} {...toast} onClose={removeToast} />
         ))}
       </div>

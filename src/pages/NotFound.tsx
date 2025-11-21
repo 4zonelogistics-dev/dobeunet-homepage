@@ -1,17 +1,19 @@
-import { Link } from 'react-router-dom';
-import { Home, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { Link } from "react-router-dom";
+import { Home, ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 export default function NotFound() {
   useEffect(() => {
-    document.title = '404 Not Found - Dobeu Tech Solutions';
+    document.title = "404 Not Found - Dobeu Tech Solutions";
   }, []);
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto text-center">
         <div className="mb-8">
-          <h1 className="text-9xl font-bold text-cyan-500 dark:text-cyan-400 mb-4">404</h1>
+          <h1 className="text-9xl font-bold text-cyan-500 dark:text-cyan-400 mb-4">
+            404
+          </h1>
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
             Page Not Found
           </h2>
@@ -42,16 +44,28 @@ export default function NotFound() {
             Looking for something specific?
           </h3>
           <div className="flex flex-wrap gap-4 justify-center text-sm">
-            <Link to="/" className="text-cyan-600 dark:text-cyan-400 hover:underline">
+            <Link
+              to="/"
+              className="text-cyan-600 dark:text-cyan-400 hover:underline"
+            >
               Home
             </Link>
-            <Link to="/privacy" className="text-cyan-600 dark:text-cyan-400 hover:underline">
+            <Link
+              to="/privacy"
+              className="text-cyan-600 dark:text-cyan-400 hover:underline"
+            >
               Privacy Policy
             </Link>
-            <Link to="/tos" className="text-cyan-600 dark:text-cyan-400 hover:underline">
+            <Link
+              to="/tos"
+              className="text-cyan-600 dark:text-cyan-400 hover:underline"
+            >
               Terms of Service
             </Link>
-            <a href="/#contact" className="text-cyan-600 dark:text-cyan-400 hover:underline">
+            <a
+              href="/#contact"
+              className="text-cyan-600 dark:text-cyan-400 hover:underline"
+            >
               Contact Us
             </a>
           </div>

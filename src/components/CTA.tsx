@@ -1,4 +1,4 @@
-import { Calendar, Users, ArrowRight } from 'lucide-react';
+import { Calendar, Users, ArrowRight } from "lucide-react";
 
 interface CTAProps {
   onStrategyClick: () => void;
@@ -7,14 +7,21 @@ interface CTAProps {
 
 export default function CTA({ onStrategyClick, onPilotClick }: CTAProps) {
   return (
-    <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" aria-labelledby="cta-heading">
+    <section
+      className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+      aria-labelledby="cta-heading"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 id="cta-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-[1.3]">
+          <h2
+            id="cta-heading"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-[1.3]"
+          >
             Ready to Stop the Profit Leak?
           </h2>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-[1.6]">
-            Let's quantify exactly where your operations are losing money - and how to fix it
+            Let's quantify exactly where your operations are losing money - and
+            how to fix it
           </p>
         </div>
 
@@ -35,7 +42,9 @@ export default function CTA({ onStrategyClick, onPilotClick }: CTAProps) {
             </h3>
 
             <p className="text-cyan-50 mb-6 leading-relaxed">
-              30-minute operational profit recovery session. Get a custom profit leak analysis with quantified savings potential and 90-day implementation roadmap.
+              30-minute operational profit recovery session. Get a custom profit
+              leak analysis with quantified savings potential and 90-day
+              implementation roadmap.
             </p>
 
             <div className="space-y-2 text-sm text-cyan-50">
@@ -70,7 +79,9 @@ export default function CTA({ onStrategyClick, onPilotClick }: CTAProps) {
             </h3>
 
             <p className="text-slate-300 mb-6 leading-relaxed">
-              Get early access to our platform with hands-on support. Shape the product while solving your operational challenges at pilot pricing.
+              Get early access to our platform with hands-on support. Shape the
+              product while solving your operational challenges at pilot
+              pricing.
             </p>
 
             <div className="space-y-2 text-sm text-slate-300">
