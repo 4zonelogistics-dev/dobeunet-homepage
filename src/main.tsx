@@ -60,10 +60,15 @@ if (!rootElement) {
           <li>Clearing your browser cache</li>
           <li>Disabling browser extensions</li>
         </ul>
-        <button onclick="window.location.reload()" style="padding: 0.5rem 1rem; background: #06b6d4; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
+        <button id="refresh-btn" style="padding: 0.5rem 1rem; background: #06b6d4; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
           Refresh Page
         </button>
       </div>
     `;
+    // Add event listener using proper DOM API instead of inline handler
+    const refreshBtn = rootElement.querySelector('#refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => window.location.reload());
+    }
   }
 }
