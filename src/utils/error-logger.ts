@@ -61,7 +61,7 @@ async function flushErrorLogs(): Promise<void> {
         })
       )
     );
-  } catch (err) {
+  } catch {
     // Don't re-queue on failure with MongoDB - the logError function already handles failures
   }
 }

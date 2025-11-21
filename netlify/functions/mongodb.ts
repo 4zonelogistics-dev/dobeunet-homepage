@@ -23,7 +23,7 @@ export async function connectToDatabase(): Promise<MongoClient> {
       // Ping the database to check if connection is alive
       await cachedClient.db('admin').command({ ping: 1 });
       return cachedClient;
-    } catch (error) {
+    } catch {
       // Connection is dead, reset and reconnect
       console.warn('Cached MongoDB connection is dead, reconnecting...');
       cachedClient = null;

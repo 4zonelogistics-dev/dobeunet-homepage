@@ -103,7 +103,7 @@ export function getCurrentTheme(): Theme {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
     return stored || 'system';
-  } catch (e) {
+  } catch {
     return 'system';
   }
 }
@@ -133,7 +133,7 @@ export function setTheme(theme: Theme): void {
 
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch (e) {
+  } catch {
     // Silently fail if localStorage is unavailable
   }
 

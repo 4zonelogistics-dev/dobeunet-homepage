@@ -80,7 +80,7 @@ export async function submitLead(
       score: data.score,
       priority: data.priority,
     };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'An unexpected error occurred' };
   }
 }
@@ -109,7 +109,7 @@ export async function logError(errorLog: ErrorLog): Promise<void> {
     });
 
     // Don't throw if error logging fails - we don't want to break the app
-  } catch (error) {
+  } catch {
     // Silently fail - error logging should never break the app
   }
 }

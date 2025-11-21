@@ -16,7 +16,7 @@ export default function IntercomChat() {
         Intercom({
           app_id: 'xu0gfiqb',
         });
-      } catch (error) {
+      } catch {
         // Gracefully handle Intercom initialization errors
         // Don't break the app if Intercom fails to load
         // Removed console.error to reduce noise in production
