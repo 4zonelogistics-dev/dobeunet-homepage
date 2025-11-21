@@ -39,7 +39,7 @@ export default function IntercomChat() {
       }
     };
 
-    if (typeof document !== 'undefined' && document.readyState === 'complete') {
+    if (document.readyState === 'complete') {
       bootIntercom();
     } else {
       window.addEventListener('load', bootIntercom, { once: true });
