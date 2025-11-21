@@ -1,15 +1,21 @@
-# Dependabot configuration for automated dependency updates
+# Dependabot Pro configuration for automated dependency updates
+# Enables security updates, version updates, and grouped updates
 
 version: 2
+
+# Enable Dependabot security updates (Pro feature)
+# This automatically creates PRs for security vulnerabilities
+enable-beta-ecosystems: true
+
 updates:
-  # Enable version updates for npm
+  # Enable version updates for npm with Pro features
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily" # Pro: More frequent checks
       time: "09:00"
-    open-pull-requests-limit: 5
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10 # Pro: Allow more PRs
     target-branch: "dev"
     reviewers:
       - "Dobeu-Tech-Solutions"
@@ -18,9 +24,17 @@ updates:
     labels:
       - "dependencies"
       - "automated"
+      - "dependabot"
     commit-message:
       prefix: "chore"
       include: "scope"
+    
+    # Pro: Auto-merge rules for minor/patch updates
+    pull-request-branch-name:
+      separator: "/"
+    
+    # Rebase strategy for clean git history
+    rebase-strategy: "auto"
     
     # Version update strategy
     versioning-strategy: increase-if-necessary

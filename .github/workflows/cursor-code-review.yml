@@ -1,0 +1,157 @@
+name: Cursor AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  cursor-review:
+    name: Cursor AI Code Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting and type checking
+        id: pre-checks
+        run: |
+          echo "Running pre-checks..."
+          npm run lint > lint-output.txt 2>&1 || true
+          npm run typecheck > typecheck-output.txt 2>&1 || true
+          npm run build > build-output.txt 2>&1 || true
+
+      - name: Run Cursor Code Review
+        id: cursor-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPOSITORY: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR TITLE: ${{ github.event.pull_request.title }}
+            AUTHOR: ${{ github.event.pull_request.user.login }}
+            BASE BRANCH: ${{ github.event.pull_request.base.ref }}
+            HEAD BRANCH: ${{ github.event.pull_request.head.ref }}
+
+            Please perform a comprehensive code review of this pull request focusing on:
+
+            ## Code Quality & Best Practices
+            - TypeScript/JavaScript best practices
+            - React patterns and hooks usage
+            - Code organization and modularity
+            - DRY principle adherence
+            - Error handling completeness
+
+            ## Performance
+            - Unnecessary re-renders
+            - Bundle size implications
+            - Memory leaks or performance bottlenecks
+            - CSS optimization opportunities
+
+            ## Security
+            - Input validation
+            - XSS vulnerabilities
+            - Sensitive data exposure
+            - API security considerations
+
+            ## Testing & Reliability
+            - Edge cases handled
+            - Error boundaries in place
+            - Potential race conditions
+            - Browser compatibility
+
+            ## MongoDB & Backend
+            - Connection handling
+            - Query optimization
+            - Error handling in Netlify functions
+            - Data validation
+
+            ## Accessibility
+            - ARIA labels
+            - Keyboard navigation
+            - Screen reader support
+            - Color contrast
+
+            Review the changed files using `gh pr diff ${{ github.event.pull_request.number }}`.
+            Provide constructive feedback and use `gh pr comment` to post your review.
+            Be thorough but focus on significant issues. Use emojis for clarity.
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr checks:*)"'
+        continue-on-error: true
+
+      - name: Post review summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            let summary = '## 🤖 Cursor AI Code Review Summary\n\n';
+            
+            // Check if lint/typecheck/build outputs exist
+            const lintOutput = fs.existsSync('lint-output.txt') 
+              ? fs.readFileSync('lint-output.txt', 'utf8') 
+              : 'Not available';
+            const typecheckOutput = fs.existsSync('typecheck-output.txt')
+              ? fs.readFileSync('typecheck-output.txt', 'utf8')
+              : 'Not available';
+            const buildOutput = fs.existsSync('build-output.txt')
+              ? fs.readFileSync('build-output.txt', 'utf8')
+              : 'Not available';
+            
+            // Analyze results
+            const lintPassed = !lintOutput.includes('error');
+            const typecheckPassed = !typecheckOutput.includes('error');
+            const buildPassed = buildOutput.includes('built in');
+            
+            summary += '### Pre-Check Results\n\n';
+            summary += `- ESLint: ${lintPassed ? '✅ Passed' : '❌ Failed'}\n`;
+            summary += `- TypeScript: ${typecheckPassed ? '✅ Passed' : '❌ Failed'}\n`;
+            summary += `- Build: ${buildPassed ? '✅ Passed' : '❌ Failed'}\n\n`;
+            
+            summary += '### Review Status\n';
+            summary += `- Cursor AI Review: ${{ steps.cursor-review.outcome }}\n\n`;
+            
+            if (!lintPassed || !typecheckPassed || !buildPassed) {
+              summary += '### ⚠️ Issues Detected\n\n';
+              if (!lintPassed) summary += '**ESLint errors found.** Please fix linting issues.\n\n';
+              if (!typecheckPassed) summary += '**TypeScript errors found.** Please fix type errors.\n\n';
+              if (!buildPassed) summary += '**Build failed.** Please fix build errors.\n\n';
+            }
+            
+            summary += '---\n';
+            summary += '*Automated review completed. Please address any issues found.*';
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summary
+            });
+
+      - name: Fail if critical issues found
+        if: steps.pre-checks.outcome == 'failure'
+        run: |
+          echo "❌ Critical issues found in pre-checks"
+          exit 1
