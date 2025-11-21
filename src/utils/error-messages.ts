@@ -171,3 +171,38 @@ export function getRecoverySteps(errorType: ErrorType): string[] {
 
   return steps[errorType];
 }
+
+/**
+ * Generate HTML for fatal error UI when React cannot mount
+ * Used for pre-React initialization errors
+ */
+export function getFatalErrorHTML(options: {
+  title?: string;
+  message?: string;
+  showRecoverySteps?: boolean;
+}): string {
+  const {
+    title = 'Application Error',
+    message = 'Unable to initialize application.',
+    showRecoverySteps = false
+  } = options;
+
+  if (!showRecoverySteps) {
+    return `<div style="padding: 2rem; text-align: center; font-family: system-ui;"><h1>${title}</h1><p>${message} Please refresh the page.</p></div>`;
+  }
+
+  return `
+    <div style="padding: 2rem; text-align: center; font-family: system-ui; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #dc2626; margin-bottom: 1rem;">${title}</h1>
+      <p style="margin-bottom: 1rem;">${message} Please try:</p>
+      <ul style="text-align: left; display: inline-block; margin-bottom: 1rem;">
+        <li>Refreshing the page</li>
+        <li>Clearing your browser cache</li>
+        <li>Disabling browser extensions</li>
+      </ul>
+      <button onclick="window.location.reload()" style="padding: 0.5rem 1rem; background: #06b6d4; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
+        Refresh Page
+      </button>
+    </div>
+  `;
+}
