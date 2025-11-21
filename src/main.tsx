@@ -25,10 +25,11 @@ createRoot(document.getElementById("root")!).render(
 if (typeof window !== "undefined") {
   // Polyfill for requestIdleCallback for Safari and unsupported browsers
   const ric = window.requestIdleCallback || function (cb: IdleRequestCallback) {
+    const SIMULATED_FRAME_BUDGET = 50; // 50ms simulates idle time budget (~20 FPS)
     return setTimeout(() => {
       cb({
         didTimeout: false,
-        timeRemaining: function () { return Math.max(0, 50 - (Date.now() % 50)); }
+        timeRemaining: function () { return Math.max(0, SIMULATED_FRAME_BUDGET - (Date.now() % SIMULATED_FRAME_BUDGET)); }
       } as IdleDeadline);
     }, 1);
   };
