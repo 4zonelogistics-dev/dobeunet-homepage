@@ -23,8 +23,17 @@ createRoot(document.getElementById("root")!).render(
 // DEFERRED INITIALIZATION: Run these after React has rendered
 // This prevents them from blocking the critical render path
 if (typeof window !== "undefined") {
+  // Polyfill for requestIdleCallback for Safari and unsupported browsers
+  const ric = window.requestIdleCallback || function (cb: IdleRequestCallback) {
+    return setTimeout(() => {
+      cb({
+        didTimeout: false,
+        timeRemaining: function () { return Math.max(0, 50 - (Date.now() % 50)); }
+      } as IdleDeadline);
+    }, 1);
+  };
   // Wait for initial render before starting background services
-  requestIdleCallback(() => {
+  ric(() => {
     // Dynamically import to reduce initial bundle size
     import("./utils/register-service-worker").then(() => {
       // Service worker is currently DISABLED due to aggressive caching issues
