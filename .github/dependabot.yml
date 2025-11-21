@@ -77,7 +77,7 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 3
-    target-branch: "dev"
+    target-branch: "main"
     labels:
       - "github-actions"
       - "automated"
