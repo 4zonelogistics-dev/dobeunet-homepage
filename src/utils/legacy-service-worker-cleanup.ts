@@ -9,19 +9,24 @@ export async function cleanupLegacyServiceWorkers(): Promise<void> {
   }
 
   try {
+    let cleaned = false;
     const registrations = await navigator.serviceWorker.getRegistrations();
     if (registrations.length) {
       await Promise.all(registrations.map((registration) => registration.unregister()));
+      cleaned = true;
     }
 
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       if (cacheNames.length) {
         await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+        cleaned = true;
       }
     }
 
-    console.info('[Service Worker] Legacy registrations removed');
+    if (cleaned) {
+      console.info('[Service Worker] Legacy registrations removed');
+    }
   } catch (error) {
     console.warn('[Service Worker] Failed to clean up legacy registrations', error);
   }
