@@ -33,7 +33,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'production',
       commit: process.env.COMMIT_REF || null,
-      region: process.env.AWS_REGION || process.env.AZURE_REGION || null,
+      region: process.env.AWS_REGION || null,
     }),
   };
 };
