@@ -1,8 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import NetworkStatus from './NetworkStatus';
-import IntercomChat from './IntercomChat';
+
+// CRITICAL FIX: Lazy load IntercomChat to prevent blocking render
+// This ensures the page loads immediately even if Intercom is blocked or slow
+const IntercomChat = lazy(() => import('./IntercomChat'));
 
 export default function Layout() {
   const scrollToTop = () => {
@@ -16,7 +20,12 @@ export default function Layout() {
       </a>
 
       <NetworkStatus />
-      <IntercomChat />
+      
+      {/* Lazy load Intercom with error boundary to prevent crashes */}
+      <Suspense fallback={null}>
+        <IntercomChat />
+      </Suspense>
+      
       <Navigation />
 
       <main id="main-content" role="main">

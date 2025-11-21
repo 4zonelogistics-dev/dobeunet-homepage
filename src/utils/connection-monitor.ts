@@ -34,8 +34,23 @@ class ConnectionMonitor {
   start(): void {
     if (this.checkInterval) return;
 
-    this.performHealthCheck();
+    // CRITICAL FIX: Don't perform immediate health check - wait for first interval
+    // This prevents blocking the initial page load with network requests
+    // Set initial status optimistically
+    this.health = {
+      status: ConnectionStatus.HEALTHY,
+      lastCheck: Date.now(),
+      latency: null,
+      consecutiveFailures: 0,
+      message: 'Initializing...'
+    };
 
+    // First check after a delay to not block initial render
+    setTimeout(() => {
+      this.performHealthCheck();
+    }, 5000); // Wait 5 seconds before first check
+
+    // Regular interval checks
     this.checkInterval = setInterval(() => {
       this.performHealthCheck();
     }, this.CHECK_INTERVAL_MS);

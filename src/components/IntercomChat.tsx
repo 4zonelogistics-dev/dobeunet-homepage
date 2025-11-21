@@ -1,32 +1,48 @@
 import { useEffect } from 'react';
-import Intercom from '@intercom/messenger-js-sdk';
 
 /**
  * Intercom Chat Component
  *
  * Integrates Intercom Messenger for customer support and engagement.
- * Initializes once when the component mounts and is available across all pages.
+ * Lazy loads Intercom after the page is fully interactive to prevent blocking render.
+ * CRITICAL: This is loaded asynchronously to avoid breaking the page if blocked by ad-blockers.
  */
 export default function IntercomChat() {
   useEffect(() => {
-    try {
-      // Initialize Intercom with app ID
-      Intercom({
-        app_id: 'xu0gfiqb',
-      });
+    // Defer Intercom loading until after the page is interactive
+    // This prevents blocking the critical render path
+    const loadIntercom = async () => {
+      try {
+        // Wait for page to be fully loaded before loading Intercom
+        if (document.readyState !== 'complete') {
+          await new Promise(resolve => {
+            window.addEventListener('load', resolve, { once: true });
+          });
+        }
 
-      console.info('[Intercom] Messenger initialized successfully');
-    } catch (error) {
-      // Gracefully handle Intercom initialization errors
-      // Don't break the app if Intercom fails to load
-      console.error('[Intercom] Failed to initialize:', error);
-    }
+        // Additional delay to ensure page is fully interactive
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Cleanup function (optional, but good practice)
-    return () => {
-      // Intercom cleanup is handled automatically by the SDK
-      // This is here for future enhancements if needed
+        // Dynamically import Intercom SDK to avoid blocking main bundle
+        const { default: Intercom } = await import('@intercom/messenger-js-sdk');
+
+        // Initialize Intercom with app ID
+        Intercom({
+          app_id: 'xu0gfiqb',
+        });
+
+        console.info('[Intercom] Messenger initialized successfully (deferred)');
+      } catch (error) {
+        // Gracefully handle Intercom initialization errors
+        // Don't break the app if Intercom fails to load or is blocked
+        console.warn('[Intercom] Failed to initialize (non-critical):', error);
+      }
     };
+
+    // Start loading Intercom (non-blocking)
+    loadIntercom();
+
+    // No cleanup needed - Intercom handles its own lifecycle
   }, []); // Empty dependency array ensures this runs only once
 
   // This component doesn't render anything visible

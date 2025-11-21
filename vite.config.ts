@@ -5,9 +5,10 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
+    include: ['react', 'react-dom', 'react-router-dom'],
   },
   build: {
-    target: 'es2015',
+    target: 'es2020', // Updated to es2020 for better performance
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -19,14 +20,19 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
+          // Split vendor code for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'lucide': ['lucide-react'],
+          // Intercom is lazy loaded, so it gets its own chunk automatically
         },
       },
     },
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
     cssCodeSplit: true,
+    // Optimize asset handling
+    assetsInlineLimit: 4096, // Inline small assets
+    reportCompressedSize: false, // Faster builds
   },
   server: {
     headers: {
