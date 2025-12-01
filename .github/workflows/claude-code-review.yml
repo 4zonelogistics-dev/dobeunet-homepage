@@ -25,6 +25,9 @@ jobs:
       issues: read
       id-token: write
 
+    env:
+      CLAUDE_CODE_VERSION: "latest"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
