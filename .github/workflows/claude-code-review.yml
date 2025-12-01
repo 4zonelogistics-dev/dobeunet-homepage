@@ -31,6 +31,23 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Clean up incomplete Claude installations
+        run: |
+          rm -rf ~/.claude* /tmp/claude* /usr/local/bin/claude
+
+      - name: Install Claude Code
+        run: |
+          attempt=0
+          until command -v claude || [ $attempt -eq 3 ]; do
+            ((attempt++))
+            curl -fsSL https://claude.ai/install.sh | bash -s -- "$CLAUDE_CODE_VERSION"
+            sleep 5
+          done
+          if ! command -v claude; then
+            echo "Claude CLI failed to install after 3 attempts."
+            exit 1
+          fi
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
