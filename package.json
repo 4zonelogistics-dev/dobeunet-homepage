@@ -17,7 +17,7 @@
   "dependencies": {
     "@intercom/messenger-js-sdk": "^0.0.18",
     "@tailwindcss/typography": "^0.5.19",
-    "lucide-react": "^0.554.0",
+    "lucide-react": "^0.555.0",
     "mongodb": "^7.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
